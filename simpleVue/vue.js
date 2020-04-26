@@ -6,13 +6,18 @@ class YVue {
     this.observe(this.$data);
 
     // test
-    new Watcher(this, 'name')
-    this.name
-    Dep.target = null;
+    // new Watcher(this, 'name')
+    // this.name
+    // Dep.target = null;
 
-    new Watcher(this, 'foo.bar')
-    this.foo.bar
-    Dep.target = null;
+    // new Watcher(this, 'foo.bar')
+    // this.foo.bar
+    // Dep.target = null;
+    new Compile(option.el, this);
+
+    if (option.created) {
+      option.created.call(this);
+    }
   }
   observe(value) {
     if (!value || typeof(value) !== 'object') {
@@ -69,13 +74,17 @@ class Dep {
 };
 
 class Watcher {
-  constructor(vm, key) {
+  constructor(vm, key, cb) {
     this.vm = vm;
     this.key = key;
+    this.cb = cb;
     
     Dep.target = this;
+    this.vm[this.key]; // 读取触发依赖收集
+    Dep.target = null;
   }
   update() {
     console.log('update', this.key);
+    this.cb.call(this.vm, this.vm[this.key]);
   }
 }
