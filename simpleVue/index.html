@@ -16,12 +16,13 @@
             <div v-html="html"></div>
             <p>{{foo.bar}}</p>
             <input type="text" v-model="name">
+            <div @click="changeName">这是一个按钮</div>
         </div>
         <script src='./compile.js'></script>
         <script src="./vue.js"></script>
 
         <script>
-            const kaikeba = new YVue({
+            const app = new YVue({
                 el: '#app',
                 data: {
                     name: 'test',
@@ -37,12 +38,11 @@
                         this.name = '我是测试'
                     }, 1500)
                 },
-                // methods:{
-                //   changeName(){
-                //     this.name = '哈喽，开课吧'
-                //     this.age = 1
-                //   }
-                // }
+                methods: {
+                    changeName() {
+                        this.name = '呵呵哒';
+                    }
+                }
             })
         </script>
     </body>

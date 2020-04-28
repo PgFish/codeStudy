@@ -1,6 +1,6 @@
 class YVue {
   constructor(option) {
-    this.$option = option;
+    this.$options = option;
     this.$data = option.data;
 
     this.observe(this.$data);

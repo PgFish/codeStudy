@@ -49,6 +49,10 @@ class Compile {
       if(attrName.indexOf('v-') === 0) {
         const dir = attrName.substring(2);
         this[dir] && this[dir](node, key);
+      } else if (attrName.indexOf('@') === 0) {
+        const directive = attrName.substring(1);
+        const fn = this.$vm.$options.methods && this.$vm.$options.methods[key];
+        if (directive && fn) node.addEventListener(directive, fn.bind(this.$vm));
       }
     });
   }
@@ -81,5 +85,17 @@ class Compile {
 
   htmlUpdator(node, val) {
     node.innerHTML = val;
+  }
+
+  model(node, key) {
+    this.update(node, key, 'model');
+
+    node.addEventListener('input', e => {
+      this.$vm[key] = e.target.value;
+    });
+  }
+
+  modelUpdator(node, val) {
+    node.value = val;
   }
 }
