@@ -17,19 +17,19 @@
         const btn = document.getElementById('btn')
         const o = {
             name: 'test',
-            age: 1
+            num: 1
         }
         const obj = reactive(o)
-        const double = computed(() => obj.age * 2)
+        const double = computed(() => obj.num * 2)
 
         effect(() => {
             // 数据变了，响应式执行这里的代码fn
             // fn会包装一层格式，方便判断computed，effect
-            root.innerHTML = `<h1>${obj.name}今年${obj.age}岁了，乘以2是${double.value}</h1>`
+            root.innerHTML = `<h1>${obj.name}买了${obj.num}斤水果，乘以2是${double.value}</h1>`
         })
         btn.addEventListener('click', () => {
             // 只操作js对象，引起dom变化
-            obj.age += 1
+            obj.num += 1
         }, false)
     </script>
 </body>
