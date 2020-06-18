@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>加载中...</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="keywords" content="合伙人, 四川移动, hhr" />
+  <meta name="description" content="四川移动合伙人" />
+  <link rel="shortcut icon" href="static/img/cmcc_logo.png">
+</head>
+<body>
+<div id="app"></div>
+<!--<script src="./static/js/vendor.dll.js"></script>-->
+<!-- <script src="//res.wx.qq.com/open/js/jweixin-1.4.0.js"></script> -->
+<script src="//res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+<script>
+  // 为IE版本<=10的浏览器加上window.location.origin属性
+  if (!window.location.origin) {
+    window.location.origin = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+  }
+  // 为IE版本<9的浏览器的数组加上indexOf方法
+  if (!Array.indexOf) {
+    Array.prototype.indexOf = function(el) {
+      for (var i = 0, n = this.length; i < n; i++) {
+        if (this[i] === el) {
+          return i;
+        }
+      }
+      return -1;
+    };
+  }
+
+  // 添加百度统计
+  var _hmt = _hmt || [];
+  window._hmt = _hmt;
+  // 解决安卓端微信页面长按时出现浏览器选择打开问题
+  document.oncontextmenu = function(e) {
+    console.log(e);
+    if (!/input|textarea/i.test(e.target.tagName)) {
+      e.preventDefault();
+    }
+  }
+  // var pageURL = window.location.href.replace(window.location.origin, '').replace(window.location.search, '').replace(/\?.*/, '');
+  // _hmt.push(['_trackPageview', pageURL]);
+  // (function() {
+  //   var baiduUidTest = '724bc2c76f33f3ba0050cb8bd59ef2f4';
+  //   var baiduUidProd = '65cc2deadf4571dcd172bbf1b4125421';
+  //   var baiduUid = baiduUidProd;
+  //   if (/localhost|127.0.0.1|dzgtest/.test(window.location.origin)) {
+  //     baiduUid = baiduUidTest;
+  //   }
+  //   var hm = document.createElement("script");
+  //   hm.src = "https://hm.baidu.com/hm.js?" + baiduUid;
+  //   var s = document.getElementsByTagName("script")[0]; 
+  //   s.parentNode.insertBefore(hm, s);
+  // })();
+</script>
+</body>
+</html>

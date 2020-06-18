@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-title" content="IE=Edge,chrome=1" />
+<meta name="keywords" content="合伙人, 四川移动, 移动合伙人, hhr" />
+<meta name="description" content="四川移动合伙人" />
+<link rel="shortcut icon" href="./img/partner_logo.png">
+<title>关注有礼</title>
+<style type="text/css">
+  body {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    background: #FFFFFF;
+  }
+  * {
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /*pointer-events: none;*/
+    box-sizing: border-box;
+  }
+  .intro-page-wrap {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  .intro-page-wrap .img {
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+  <div id="wrapper" class="intro-page-wrap">
+    <img id="img" class="img" src="./img/followreward.png" />
+  </div>
+  <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9/crypto-js.min.js"></script> -->
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/crypto-js.min.js"></script>
+  <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>
+  <script type="text/javascript" src="./js/utils.js"></script>
+  <script type="text/javascript">
+    var shareObj = {
+      title: '2G国内流量免费领',
+      desc: '“关注“四川移动合伙人”微信公众号，即可免费领取2G国内流量！',
+      link: window.location.origin + baseUrl + '/register/wx/oAuth/openId?info=gpas_followreward.html',
+      imgUrl: window.location.origin + baseUrl + '/partner/static/img/cmcc_logo.png',
+      timelineTitle: '2G国内流量免费领',
+      outerWechatLink: window.location.origin + baseUrl + '/packageSalary/share?url=' + encodeURIComponent(window.location.origin + baseUrl + '/home/gpas_followreward.html'),
+      // hideList: [],
+      showList: [
+        'menuItem:share:qq',
+        'menuItem:share:weiboApp',
+        'menuItem:share:appMessage',
+        'menuItem:share:timeline',
+        'menuItem:favorite',
+        'menuItem:share:facebook',
+        'menuItem:share:QZone'
+        // 'menuItem:copyUrl',
+        // 'menuItem:openWithSafari',
+        // 'menuItem:openWithQQBrowser',
+        // 'menuItem:share:email'
+      ],
+      success: function() {
+      },
+      cancel: function() {
+      }
+    };
+    getJsApiConfig(shareObj);
+    var timer = setInterval(function() {
+      console.log(document.getElementById('img').offsetHeight);
+      if (document.getElementById('img').offsetHeight > 0) {
+        document.getElementById('wrapper').style.height = document.getElementById('img').offsetHeight + 'px';
+        clearInterval(timer);
+      }
+    }, 100);
+  </script>
+</body>
+</html>
