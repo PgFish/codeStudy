@@ -119,7 +119,7 @@ export default {
       removeSession('partnerticket');
       removeSession('ptPublicOpenId');
       removeSession('ptDetailInfo');
-      pageRouter(this, {path: '/emp'}, 'replace');
+      pageRouter(this, { path: '/emp' }, 'replace');
     },
     doCheck () {
       let serverUserInfo = getSession('ptDetailInfo');
@@ -225,7 +225,7 @@ export default {
 //   }
 // }
 </script>
-<style>
+<style lang="less">
 .change-code-tip {
   position: fixed;
   left: 0;

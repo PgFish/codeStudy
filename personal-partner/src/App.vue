@@ -15,76 +15,76 @@
   </div>
 </template>
 <script>
-  import { getParamValue, isZTBoolean, isWechatBoolean, isDZGBoolean, sourceType } from 'src/assets/utils';
-  import { Indicator } from 'mint-ui';
-  import { allowPages } from 'src/permission.js';
+import { getParamValue, isZTBoolean, isWechatBoolean, isDZGBoolean, sourceType } from 'src/assets/utils';
+import { Indicator } from 'mint-ui';
+import { allowPages } from 'src/permission.js';
 
-  export default {
-    data() {
-      return {
-        hasAuth: false,
-        isEmp: false,
-        consoleLogs: '',
-        showAgree: false,
-        agreement: ''
-      };
-    },
-    mounted() {
-      this.Bus.$on('openAgree', (agreement) => {
-        console.log('openAgreeTriggerred');
-        if (agreement) {
-          this.agreement = agreement;
-          this.showAgree = true;
-        }
-      });
-    },
-    created() {
-      this.Bus.loading = this.Bus.$createToast({
-        time: 0,
-        txt: '加载中...',
-        mask: true
-      })
-      if (sourceType === 'employee') {
-        this.isEmp = true;
+export default {
+  data() {
+    return {
+      hasAuth: false,
+      isEmp: false,
+      consoleLogs: '',
+      showAgree: false,
+      agreement: ''
+    };
+  },
+  mounted() {
+    this.Bus.$on('openAgree', (agreement) => {
+      console.log('openAgreeTriggerred');
+      if (agreement) {
+        this.agreement = agreement;
+        this.showAgree = true;
       }
-      if (isZTBoolean) {
-        document.title = '四川移动合伙人';
-      } else {
-        document.title = '加载中...';
-      }
-      Indicator.open();
-      // this.consoleLogs += '<p>有无getShareInfoShowRightTopShareBtn方法：' + (typeof getShareInfoShowRightTopShareBtn) + ',' + (typeof getShareInfoShowRightTopShareBtn !== 'undefined') + '</p>';
-      // this.consoleLogs += '<p>有无jumpShare.jumpToShare方法：' + (typeof jumpShare !== 'undefined' && jumpShare.jumpToShare) + '</p>';
-      // this.consoleLogs += '<p>isZT：' + window.getShareInfoShowShareBtnWithType + '</p>';
-      let backDoor = getParamValue('royyi') === '1' || process.env.NODE_ENV === 'development';
-      let isWX = isWechatBoolean; // 是微信的链接，并且是微信浏览器
-      let isZT = isZTBoolean; // 是掌厅链接，并且是掌厅浏览器
-      let isDZG = isDZGBoolean; // 是大掌柜链接，并且是大掌柜浏览器
-
-      let pageReg = new RegExp('#/(' + allowPages + ')', 'i');
-      let exceptPages = pageReg.test(window.location.hash); // 放开权限的页面
-      // this.consoleLogs += '<p>当前页面hash路由：' + window.location.hash + '</p>';
-      if (backDoor || exceptPages || isWX || isZT || isDZG) {
-        this.hasAuth = true;
-      } else {
-        setTimeout(() => {
-          Indicator.close();
-        }, 2000);
-        this.hasAuth = false;
-        document.title = 'Error';
-      }
-    },
-    methods: {
-      clickDisagree () {
-        this.Bus.$emit('closeAgree', false);
-        this.showAgree = false;
-      },
-      clickAgree () {
-        this.Bus.$emit('closeAgree', true);
-        this.showAgree = false;
-      }
+    });
+  },
+  created() {
+    this.Bus.loading = this.Bus.$createToast({
+      time: 0,
+      txt: '加载中...',
+      mask: true
+    })
+    if (sourceType === 'employee') {
+      this.isEmp = true;
     }
-  };
+    if (isZTBoolean) {
+      document.title = '四川移动合伙人';
+    } else {
+      document.title = '加载中...';
+    }
+    Indicator.open();
+    // this.consoleLogs += '<p>有无getShareInfoShowRightTopShareBtn方法：' + (typeof getShareInfoShowRightTopShareBtn) + ',' + (typeof getShareInfoShowRightTopShareBtn !== 'undefined') + '</p>';
+    // this.consoleLogs += '<p>有无jumpShare.jumpToShare方法：' + (typeof jumpShare !== 'undefined' && jumpShare.jumpToShare) + '</p>';
+    // this.consoleLogs += '<p>isZT：' + window.getShareInfoShowShareBtnWithType + '</p>';
+    let backDoor = getParamValue('royyi') === '1' || process.env.NODE_ENV === 'development';
+    let isWX = isWechatBoolean; // 是微信的链接，并且是微信浏览器
+    let isZT = isZTBoolean; // 是掌厅链接，并且是掌厅浏览器
+    let isDZG = isDZGBoolean; // 是大掌柜链接，并且是大掌柜浏览器
+
+    let pageReg = new RegExp('#/(' + allowPages + ')', 'i');
+    let exceptPages = pageReg.test(window.location.hash); // 放开权限的页面
+    // this.consoleLogs += '<p>当前页面hash路由：' + window.location.hash + '</p>';
+    if (backDoor || exceptPages || isWX || isZT || isDZG) {
+      this.hasAuth = true;
+    } else {
+      setTimeout(() => {
+        Indicator.close();
+      }, 2000);
+      this.hasAuth = false;
+      document.title = 'Error';
+    }
+  },
+  methods: {
+    clickDisagree () {
+      this.Bus.$emit('closeAgree', false);
+      this.showAgree = false;
+    },
+    clickAgree () {
+      this.Bus.$emit('closeAgree', true);
+      this.showAgree = false;
+    }
+  }
+};
 </script>
 <style lang="less">
   @import "../static/css/main.css";

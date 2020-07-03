@@ -4,7 +4,7 @@
     <div class="showfirst" v-if="showfirst">
       <img class="showfirst-img" src="static/img/guide/guideLogo.png">
       <div class="showfirst-guide" @click="gotoGuide">第一次来？新手教程</div>
-      <div class="showfirst-index" @click="gotoIndex">跳过</div>  
+      <div class="showfirst-index" @click="gotoIndex">跳过</div>
     </div>
     <div v-if="showGuide" class="guide-img" @click="guideStart">
       <img :src="isZW ? zwGuide[num] : guide[num]">
@@ -721,7 +721,7 @@ function canvasTextAutoWrap (str, ctx, initX, initY, drawWidth, lineHeight, rowN
 }
 </script>
 
-<style>
+<style lang="less">
 body {
   background: #f0f0f0;
 }

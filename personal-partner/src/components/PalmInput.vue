@@ -79,7 +79,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="less">
   .palm-input {
   }
 </style>

@@ -11,113 +11,113 @@ export default new Router({
     },
     {
       path: '/index',
-      component: () => import('../pages/base/Home.vue'),
+      component: resolve => require(['../pages/base/Home.vue'], resolve),
       children: [
         {
           path: '/',
-          component: () => import('../pages/index.vue')
+          component: resolve => require(['../pages/index.vue'], resolve)
         },
         {
           path: '/orderList',
-          component: () => import('../pages/orderList.vue')
+          component: resolve => require(['../pages/orderList.vue'], resolve)
         },
         {
           path: '/tradeDetail',
-          component: () => import('../pages/tradeDetail.vue')
+          component: resolve => require(['../pages/tradeDetail.vue'], resolve)
         },
         {
           path: '/statistics',
-          component: () => import('../pages/statistics.vue')
+          component: resolve => require(['../pages/statistics.vue'], resolve)
         },
         {
           path: '/withdraw',
-          component: () => import('../pages/withdraw.vue')
+          component: resolve => require(['../pages/withdraw.vue'], resolve)
         },
         {
           path: '/logistics',
-          component: () => import('../pages/logistics.vue')
+          component: resolve => require(['../pages/logistics.vue'], resolve)
         },
         {
           path: '/introduce',
-          component: () => import('../pages/introduce.vue')
+          component: resolve => require(['../pages/introduce.vue'], resolve)
         },
         {
           path: '/rule',
-          component: () => import('../pages/rule.vue')
+          component: resolve => require(['../pages/rule.vue'], resolve)
         },
         {
           path: '/moneyStrategy',
-          component: () => import('../pages/moneyStrategy.vue')
+          component: resolve => require(['../pages/moneyStrategy.vue'], resolve)
         },
         {
           path: '/bindinviter',
-          component: () => import('../pages/bindinviter.vue')
+          component: resolve => require(['../pages/bindinviter.vue'], resolve)
         },
         {
           path: '/myinvitercodes',
-          component: () => import('../pages/myinvitercodes.vue')
+          component: resolve => require(['../pages/myinvitercodes.vue'], resolve)
         }
       ]
     },
     {
       path: '/activity',
-      component: () => import('../pages/activity.vue')
+      component: resolve => require(['../pages/activity.vue'], resolve)
     },
     {
       path: '/chest',
-      component: () => import('../pages/chestActivity.vue')
+      component: resolve => require(['../pages/chestActivity.vue'], resolve)
     },
     {
       path: '/giveback',
-      component: () => import('../pages/giveback.vue')
+      component: resolve => require(['../pages/giveback.vue'], resolve)
     },
     {
       path: '/login',
-      component: () => import('../pages/base/Login.vue')
+      component: resolve => require(['../pages/base/Login.vue'], resolve)
     },
     {
       path: '/error',
-      component: () => import('../pages/base/Error.vue')
+      component: resolve => require(['../pages/base/Error.vue'], resolve)
     },
     {
       path: '/listener',
-      component: () => import('../pages/base/Listener.vue')
+      component: resolve => require(['../pages/base/Listener.vue'], resolve)
     },
     {
       path: '/codeshare',
-      component: () => import('../pages/codeshare.vue')
+      component: resolve => require(['../pages/codeshare.vue'], resolve)
     },
     {
       path: '/feedetail',
-      component: () => import('../pages/feedetail.vue')
+      component: resolve => require(['../pages/feedetail.vue'], resolve)
     },
     {
       path: '/followreward',
-      component: () => import('../pages/followreward.vue')
+      component: resolve => require(['../pages/followreward.vue'], resolve)
     },
     {
       path: '/shareshop',
-      component: () => import('../pages/shareshop.vue')
+      component: resolve => require(['../pages/shareshop.vue'], resolve)
     },
     {
       path: '/checkin',
-      component: () => import('../pages/checkin.vue')
+      component: resolve => require(['../pages/checkin.vue'], resolve)
     },
     {
       path: '/familyDetail',
-      component: () => import('../pages/familyDetail.vue')
+      component: resolve => require(['../pages/familyDetail.vue'], resolve)
     },
     {
       path: '/familyMember',
-      component: () => import('../pages/familyMember.vue')
+      component: resolve => require(['../pages/familyMember.vue'], resolve)
     },
     {
       path: '/handlesuperflow',
-      component: () => import('../pages/handlesuperflow.vue')
+      component: resolve => require(['../pages/handlesuperflow.vue'], resolve)
     },
     {
       path: '/redirect',
-      component: () => import('../pages/base/Redirect.vue')
+      component: resolve => require(['../pages/base/Redirect.vue'], resolve)
     },
     {
       path: '/emp',
@@ -125,45 +125,45 @@ export default new Router({
     },
     {
       path: '/emp/login',
-      component: () => import('../pages/employee/EMP_Login.vue')
+      component: resolve => require(['../pages/employee/EMP_Login.vue'], resolve)
     },
     {
       path: '/emp/index',
-      component: () => import('../pages/employee/EMP_Home.vue'),
+      component: resolve => require(['../pages/employee/EMP_Home.vue'], resolve),
       children: [
         {
           path: '/',
-          component: () => import('../pages/employee/EMP_Index.vue')
+          component: resolve => require(['../pages/employee/EMP_Index.vue'], resolve)
         },
         {
           path: '/emp/orderList',
-          component: () => import('../pages/employee/EMP_OrderList.vue')
+          component: resolve => require(['../pages/employee/EMP_OrderList.vue'], resolve)
         },
         {
           path: '/emp/orderDetail',
-          component: () => import('../pages/employee/EMP_OrderDetail.vue')
+          component: resolve => require(['../pages/employee/EMP_OrderDetail.vue'], resolve)
         }
       ]
     },
     {
       path: '/emp/shareshop',
-      component: () => import('../pages/employee/EMP_ShareShop.vue')
+      component: resolve => require(['../pages/employee/EMP_ShareShop.vue'], resolve)
     },
     {
       path: '/promisefee',
-      component: () => import('../pages/promisefee/index.vue')
+      component: resolve => require(['../pages/promisefee/index.vue'], resolve)
     },
     {
       path: '/instockfees',
-      component: () => import('../pages/promisefee/instockfees.vue')
+      component: resolve => require(['../pages/promisefee/instockfees.vue'], resolve)
     },
     {
       path: '/tvaddfee',
-      component: () => import('../pages/tvBusiness/TVAddFee.vue')
+      component: resolve => require(['../pages/tvBusiness/TVAddFee.vue'], resolve)
     },
     {
       path: '/consobusiness',
-      component: () => import('../pages/ConsoBusiness.vue')
+      component: resolve => require(['../pages/ConsoBusiness.vue'], resolve)
     }
   ]
 });

@@ -637,7 +637,7 @@ export default {
   }
 };
 </script>
-<style>
+<style lang="less">
 .marginTop15 {
   margin-top: 15px;
 }
@@ -1187,6 +1187,3 @@ export default {
   z-index: 999 !important;
 }
 </style>
-
-
-

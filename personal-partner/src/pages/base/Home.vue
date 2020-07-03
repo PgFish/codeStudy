@@ -458,7 +458,7 @@ export default {
     toBindInviter: function(e) {
       e.stopPropagation();
       this.isSlideShow = false;
-      pageRouter(this, {path: '/bindinviter', query: {p: this.$route.query.p, ptid: this.$route.query.ptid}}, 'replace');
+      pageRouter(this, { path: '/bindinviter', query: { p: this.$route.query.p, ptid: this.$route.query.ptid } }, 'replace');
     },
     toGpas_qa(e) {
       e.stopPropagation();
@@ -481,7 +481,7 @@ export default {
     toMyInviteCodes: function(e) {
       e.stopPropagation();
       this.isSlideShow = false;
-      pageRouter(this, {path: '/myinvitercodes', query: {p: this.$route.query.p, ptid: this.$route.query.ptid}});
+      pageRouter(this, { path: '/myinvitercodes', query: { p: this.$route.query.p, ptid: this.$route.query.ptid } });
     },
     exitLogin: function(e) {
       e.stopPropagation();
@@ -551,7 +551,7 @@ export default {
 //   }
 // }
 </script>
-<style>
+<style lang="less">
 .change-code-tip {
   position: fixed;
   left: 0;

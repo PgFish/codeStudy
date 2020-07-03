@@ -16,7 +16,7 @@
         <div class="giveback-verifycode-row">
           <input type="tel" v-model="phone"  maxlength="11" placeholder="请输入手机号码"/>
         </div>
-        
+
         <div class="giveback-verifycode-row flex-row">
           <input type="text" placeholder="请输入验证码" v-model="sms" maxlength="6"/>
           <div class="giveback-verifycode-btn" :class="{'btn-disabled': isSending}" @click="getSms">{{smsTip}}</div>
@@ -39,205 +39,205 @@
 </template>
 
 <script>
-  import { Constants, baseUrl, getRequestParams, sendGetRequest, sendJsonPostRequest, getJsApiConfig, encryptByDES, YEK_SED, getSession } from 'src/assets/utils.js';
-  import { Indicator, MessageBox, Toast } from 'mint-ui';
-  import Qs from 'qs';
-  export default {
-    components: {
-      Indicator,
-      MessageBox,
-      Toast
-    },
-    data() {
-      return {
-        userInfo: {},
-        ruleList: {},
-        phone: '',
-        sms: '',
-        smsTip: '点击获取验证码',
-        isSending: false,
-        selectedGiveback: '',
-        currentSelected: {},
-        givebackMapping: {
-          GIVEBACK_20: 'AZ421230',
-          GIVEBACK_50: 'AZ421231'
-        },
-        partnerId: ''
-      };
-    },
-    watch: {
-      isSending(val) {
-        if (val) {
-          let smsCnt = 60;
+import { Constants, baseUrl, getRequestParams, sendGetRequest, sendJsonPostRequest, getJsApiConfig, encryptByDES, YEK_SED, getSession } from 'src/assets/utils.js';
+import { Indicator, MessageBox, Toast } from 'mint-ui';
+import Qs from 'qs';
+export default {
+  components: {
+    Indicator,
+    MessageBox,
+    Toast
+  },
+  data() {
+    return {
+      userInfo: {},
+      ruleList: {},
+      phone: '',
+      sms: '',
+      smsTip: '点击获取验证码',
+      isSending: false,
+      selectedGiveback: '',
+      currentSelected: {},
+      givebackMapping: {
+        GIVEBACK_20: 'AZ421230',
+        GIVEBACK_50: 'AZ421231'
+      },
+      partnerId: ''
+    };
+  },
+  watch: {
+    isSending(val) {
+      if (val) {
+        let smsCnt = 60;
+        this.smsTip = smsCnt + 's';
+        let timer = setInterval(() => {
+          smsCnt--;
           this.smsTip = smsCnt + 's';
-          let timer = setInterval(() => {
-            smsCnt--;
-            this.smsTip = smsCnt + 's';
-            if (smsCnt <= 0) {
-              clearInterval(timer);
-              this.isSending = false;
-            }
-          }, 1000);
-        } else {
-          this.smsTip = '点击获取验证码';
-        }
-      }
-    },
-    created() {
-      if (this.$route.query.partnerId || this.$route.query.partnerId === 0) {
-        this.partnerId = this.$route.query.partnerId;
+          if (smsCnt <= 0) {
+            clearInterval(timer);
+            this.isSending = false;
+          }
+        }, 1000);
       } else {
-        let serverUserInfo = getSession('ptDetailInfo', true);
-        if (serverUserInfo) {
-          this.partnerId = serverUserInfo.id;
-        }
-      }
-      let shareObj = {
-        title: '话费存一得二',
-        desc: '话费存一得二，优惠没文案，简单粗暴免费送',
-        link: `${window.location.origin + baseUrl}/common/redirect?info=path=givebacklistenpartnerId=${this.partnerId}`,
-        imgUrl: `${window.location.origin + baseUrl}/partner/static/img/giveback/share_logo.png`,
-        timelineTitle: '话费存一得二，优惠没文案，简单粗暴免费送',
-        showList: [
-          'menuItem:share:qq',
-          'menuItem:share:weiboApp',
-          'menuItem:share:appMessage',
-          'menuItem:share:timeline',
-          'menuItem:favorite',
-          'menuItem:share:QZone'
-        ]
-      };
-      getJsApiConfig(shareObj);
-      document.title = '"合伙人"专享存送';
-
-      Indicator.close();
-      this.getGivebackRule('GIVEBACK_20');
-    },
-    methods: {
-      getGivebackRule: function(code) {
-        this.selectedGiveback = code;
-        if (this.ruleList[code]) {
-          this.currentSelected = this.ruleList[code];
-          return;
-        }
-        let url = baseUrl + '/richText/get';
-        let params = Qs.stringify({
-          code: code
-        });
-        url = url + '?' + params;
-        let rtnObj = {};
-        let reqParams = getRequestParams(url, '', (vue, json) => {
-          Indicator.close();
-          if (json && '' + json.status === '0' && '' + json.data.enabled === '0') {
-            rtnObj.name = json.data.name;
-            rtnObj.code = json.data.remark;
-            rtnObj.detail = json.data.detail;
-            vue.currentSelected = rtnObj;
-            vue.ruleList[code] = rtnObj;
-          } else {
-            vue.ruleList[code] = '';
-          }
-        }, (vue, ex) => {
-          Indicator.close();
-          vue.ruleList[code] = '';
-        }, '');
-        Indicator.open();
-        sendGetRequest(this, reqParams);
-      },
-      getSms: function() {
-        if (!Constants.cmccMobileReg.test(this.phone)) {
-          Toast({message: '请输入正确的移动手机号码！', duration: 1200});
-          return;
-        }
-        if (this.isSending) {
-          Toast({message: `请等待${this.smsTip}`, duration: 1200});
-          return;
-        }
-        let url = `${baseUrl}/verifyCode/send`; // 获取短信验证码
-        let params = {
-          'phone': encryptByDES.CBC('' + this.phone, YEK_SED)
-        };
-        let reqParams = getRequestParams(url, params, (vue, json) => {
-          Indicator.close();
-          if (json.status === 0) {
-            Toast(json.msg || '短信验证码发送成功');
-          } else {
-            Toast(json.msg || '短信验证码发送失败，请重试');
-          }
-        }, (vue, ex) => {
-          Indicator.close();
-          Toast('网络异常，短信验证码发送失败');
-        }, '');
-        Indicator.open();
-        this.isSending = true;
-        sendJsonPostRequest(this, reqParams);
-      },
-      hanlde: function() {
-        if (!this.currentSelected || (this.currentSelected && !this.currentSelected.code)) {
-          Toast({message: '未获取到资费代码，请刷新页面重试', duration: 1200});
-          return;
-        }
-        if (!Constants.cmccMobileReg.test(this.phone)) {
-          Toast({message: '请输入正确的移动手机号码！', duration: 1200});
-          return;
-        }
-        if (!/\d{6}/.test(this.sms)) {
-          Toast({message: '请输入正确的验证码！', duration: 1200});
-          return;
-        }
-        let url = `${baseUrl}/business/submit/cs`;
-        let params = {
-          'TARIFF_INFO': {
-            'TYPE': 'BUSINESS_MODE',
-            'CODE': this.currentSelected.code,
-            'NAME': this.currentSelected.name,
-            'ACTIVE_CODE': this.currentSelected.code,
-            'FLAG_CODE': '1'
-          },
-          'SERVICE_INFO': {
-            'PHONE_NO': '' + this.phone
-          },
-          'SALE_TYPE': '1',
-          'EMP_INFO': {
-            'EMP_CODE': 'ob0086',
-            'PHONE_NO': '' + this.phone // !这里暂时改成 用户的手机号 路由
-          },
-          'VERIFY_INFO': {
-            'TYPE': '1',
-            'CODE': '' + this.sms
-          },
-          'MEMBER_USER_NAME': '13880451171',
-          'PARTNER_ID': (this.partnerId || this.partnerId === 0) ? ('' + this.partnerId) : '-1'
-        };
-        let reqParams = getRequestParams(url, params, (vue, json) => {
-          Indicator.close();
-          console.log(json);
-          if (json && ('' + json.ROOT.RETURN_CODE === '0')) {
-            MessageBox.alert('办理成功！').then(() => {
-              // pageRouter(vue, {path: '/', query: {p: this.$route.query.p, ptid: this.$route.query.ptid}});
-              vue.sms = vue.phone = '';
-            });
-          } else {
-            Toast(json.ROOT ? (json.ROOT.DETAIL_MSG || json.ROOT.RETURN_MSG || '失败') : '失败');
-          }
-        }, (vue, ex) => {
-          Indicator.close();
-          Toast('异常: ' + ex);
-        }, '');
-        Indicator.open();
-        sendJsonPostRequest(this, reqParams);
+        this.smsTip = '点击获取验证码';
       }
     }
-  };
+  },
+  created() {
+    if (this.$route.query.partnerId || this.$route.query.partnerId === 0) {
+      this.partnerId = this.$route.query.partnerId;
+    } else {
+      let serverUserInfo = getSession('ptDetailInfo', true);
+      if (serverUserInfo) {
+        this.partnerId = serverUserInfo.id;
+      }
+    }
+    let shareObj = {
+      title: '话费存一得二',
+      desc: '话费存一得二，优惠没文案，简单粗暴免费送',
+      link: `${window.location.origin + baseUrl}/common/redirect?info=path=givebacklistenpartnerId=${this.partnerId}`,
+      imgUrl: `${window.location.origin + baseUrl}/partner/static/img/giveback/share_logo.png`,
+      timelineTitle: '话费存一得二，优惠没文案，简单粗暴免费送',
+      showList: [
+        'menuItem:share:qq',
+        'menuItem:share:weiboApp',
+        'menuItem:share:appMessage',
+        'menuItem:share:timeline',
+        'menuItem:favorite',
+        'menuItem:share:QZone'
+      ]
+    };
+    getJsApiConfig(shareObj);
+    document.title = '"合伙人"专享存送';
+
+    Indicator.close();
+    this.getGivebackRule('GIVEBACK_20');
+  },
+  methods: {
+    getGivebackRule: function(code) {
+      this.selectedGiveback = code;
+      if (this.ruleList[code]) {
+        this.currentSelected = this.ruleList[code];
+        return;
+      }
+      let url = baseUrl + '/richText/get';
+      let params = Qs.stringify({
+        code: code
+      });
+      url = url + '?' + params;
+      let rtnObj = {};
+      let reqParams = getRequestParams(url, '', (vue, json) => {
+        Indicator.close();
+        if (json && '' + json.status === '0' && '' + json.data.enabled === '0') {
+          rtnObj.name = json.data.name;
+          rtnObj.code = json.data.remark;
+          rtnObj.detail = json.data.detail;
+          vue.currentSelected = rtnObj;
+          vue.ruleList[code] = rtnObj;
+        } else {
+          vue.ruleList[code] = '';
+        }
+      }, (vue, ex) => {
+        Indicator.close();
+        vue.ruleList[code] = '';
+      }, '');
+      Indicator.open();
+      sendGetRequest(this, reqParams);
+    },
+    getSms: function() {
+      if (!Constants.cmccMobileReg.test(this.phone)) {
+        Toast({ message: '请输入正确的移动手机号码！', duration: 1200 });
+        return;
+      }
+      if (this.isSending) {
+        Toast({ message: `请等待${this.smsTip}`, duration: 1200 });
+        return;
+      }
+      let url = `${baseUrl}/verifyCode/send`; // 获取短信验证码
+      let params = {
+        'phone': encryptByDES.CBC('' + this.phone, YEK_SED)
+      };
+      let reqParams = getRequestParams(url, params, (vue, json) => {
+        Indicator.close();
+        if (json.status === 0) {
+          Toast(json.msg || '短信验证码发送成功');
+        } else {
+          Toast(json.msg || '短信验证码发送失败，请重试');
+        }
+      }, (vue, ex) => {
+        Indicator.close();
+        Toast('网络异常，短信验证码发送失败');
+      }, '');
+      Indicator.open();
+      this.isSending = true;
+      sendJsonPostRequest(this, reqParams);
+    },
+    hanlde: function() {
+      if (!this.currentSelected || (this.currentSelected && !this.currentSelected.code)) {
+        Toast({ message: '未获取到资费代码，请刷新页面重试', duration: 1200 });
+        return;
+      }
+      if (!Constants.cmccMobileReg.test(this.phone)) {
+        Toast({ message: '请输入正确的移动手机号码！', duration: 1200 });
+        return;
+      }
+      if (!/\d{6}/.test(this.sms)) {
+        Toast({ message: '请输入正确的验证码！', duration: 1200 });
+        return;
+      }
+      let url = `${baseUrl}/business/submit/cs`;
+      let params = {
+        'TARIFF_INFO': {
+          'TYPE': 'BUSINESS_MODE',
+          'CODE': this.currentSelected.code,
+          'NAME': this.currentSelected.name,
+          'ACTIVE_CODE': this.currentSelected.code,
+          'FLAG_CODE': '1'
+        },
+        'SERVICE_INFO': {
+          'PHONE_NO': '' + this.phone
+        },
+        'SALE_TYPE': '1',
+        'EMP_INFO': {
+          'EMP_CODE': 'ob0086',
+          'PHONE_NO': '' + this.phone // !这里暂时改成 用户的手机号 路由
+        },
+        'VERIFY_INFO': {
+          'TYPE': '1',
+          'CODE': '' + this.sms
+        },
+        'MEMBER_USER_NAME': '13880451171',
+        'PARTNER_ID': (this.partnerId || this.partnerId === 0) ? ('' + this.partnerId) : '-1'
+      };
+      let reqParams = getRequestParams(url, params, (vue, json) => {
+        Indicator.close();
+        console.log(json);
+        if (json && ('' + json.ROOT.RETURN_CODE === '0')) {
+          MessageBox.alert('办理成功！').then(() => {
+            // pageRouter(vue, {path: '/', query: {p: this.$route.query.p, ptid: this.$route.query.ptid}});
+            vue.sms = vue.phone = '';
+          });
+        } else {
+          Toast(json.ROOT ? (json.ROOT.DETAIL_MSG || json.ROOT.RETURN_MSG || '失败') : '失败');
+        }
+      }, (vue, ex) => {
+        Indicator.close();
+        Toast('异常: ' + ex);
+      }, '');
+      Indicator.open();
+      sendJsonPostRequest(this, reqParams);
+    }
+  }
+};
 </script>
-<style scoped>
+<style lang="less" scoped>
 /*   body {
     background: #DCEEFC;
   } */
   .flex-vc {
     display: -webkit-box;
     display: -webkit-flex;
-    display: box;
+    ;
     display: flex;
     display: -ms-flex;
     flex-direction: column;
@@ -246,7 +246,7 @@
   .flex-row {
     display: -webkit-box;
     display: -webkit-flex;
-    display: box;
+    ;
     display: flex;
     display: -ms-flex;
   }

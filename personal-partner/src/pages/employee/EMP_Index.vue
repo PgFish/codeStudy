@@ -1028,7 +1028,7 @@ function canvasTextAlignCenter (str, ctx, initY, drawWidth, totalWidth, lineHeig
 }
 </script>
 
-<style>
+<style lang="less">
 body {
   background: #f0f0f0;
 }
@@ -1160,7 +1160,7 @@ body {
         position: relative;
         top: 10px;
         padding-top: 10px;
-        padding: 8px 0 0; 
+        padding: 8px 0 0;
         height: 60px;
         display: flex;
         align-items: center;

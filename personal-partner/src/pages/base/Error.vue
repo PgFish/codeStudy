@@ -2,26 +2,26 @@
   <div class="tip-wrap">{{tip}}</div>
 </template>
 <script>
-  import { Indicator, MessageBox, Toast } from 'mint-ui';
-  export default {
-    components: {
-      Indicator,
-      MessageBox,
-      Toast
-    },
-    data() {
-      return {
-        tip: ''
-      };
-    },
-    created() {
-      document.title = 'Error';
-      Indicator.close();
-      this.tip = this.$route.query.errorInfo || '出错啦！';
-    }
-  };
+import { Indicator, MessageBox, Toast } from 'mint-ui';
+export default {
+  components: {
+    Indicator,
+    MessageBox,
+    Toast
+  },
+  data() {
+    return {
+      tip: ''
+    };
+  },
+  created() {
+    document.title = 'Error';
+    Indicator.close();
+    this.tip = this.$route.query.errorInfo || '出错啦！';
+  }
+};
 </script>
-<style>
+<style lang="less">
   .tip-wrap {
     position: absolute;
     top: 20%;

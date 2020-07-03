@@ -80,168 +80,168 @@
 </template>
 
 <script>
-  import { baseUrl, getRequestParams, sendGetRequest, isWechat, closeIllegalPage, getSession, pageRouter } from 'src/assets/utils.js';
-  import { Indicator, MessageBox, Toast } from 'mint-ui';
-  import Qs from 'qs';
-  export default {
-    components: {
-      Indicator,
-      MessageBox,
-      Toast
-    },
-    data() {
-      return {
-        phone: '',
-        userInfo: {},
-        lastPage: true,
-        isNoRecord: true,
-        isLoading: false,
-        pageNumber: 1,
-        orderNum: 0,
-        totalIncome: 0,
-        tradeList: [],
-        realName: ''
-      };
-    },
-    watch: {
-    },
-    created() {
-      Indicator.close();
-      document.title = '交易明细';
-      let srcInfo = getSession('ptSourceInfo', true);
-      if (srcInfo) {
-        this.userInfo = srcInfo.userInfo;
-        if (!this.userInfo) {
-          this.userInfo = {};
-        }
-      } else {
-        closeIllegalPage(this);
-        return;
+import { baseUrl, getRequestParams, sendGetRequest, isWechat, closeIllegalPage, getSession, pageRouter } from 'src/assets/utils.js';
+import { Indicator, MessageBox, Toast } from 'mint-ui';
+import Qs from 'qs';
+export default {
+  components: {
+    Indicator,
+    MessageBox,
+    Toast
+  },
+  data() {
+    return {
+      phone: '',
+      userInfo: {},
+      lastPage: true,
+      isNoRecord: true,
+      isLoading: false,
+      pageNumber: 1,
+      orderNum: 0,
+      totalIncome: 0,
+      tradeList: [],
+      realName: ''
+    };
+  },
+  watch: {
+  },
+  created() {
+    Indicator.close();
+    document.title = '交易明细';
+    let srcInfo = getSession('ptSourceInfo', true);
+    if (srcInfo) {
+      this.userInfo = srcInfo.userInfo;
+      if (!this.userInfo) {
+        this.userInfo = {};
       }
-      if (!isWechat() && this.userInfo.realName) {
-        this.realName = this.userInfo.realName;
+    } else {
+      closeIllegalPage(this);
+      return;
+    }
+    if (!isWechat() && this.userInfo.realName) {
+      this.realName = this.userInfo.realName;
+    }
+    this.statusMapping = {
+      1: { status: '激活返利', icon: '+', name: 'packageName', code: 'cardNumber' },
+      2: { status: '充值返利', icon: '+', name: 'packageName', code: 'cardNumber' },
+      5: { status: '提现成功', icon: '-', name: 'oppositeName', code: 'oppositeNumber' },
+      6: { status: '提现中', icon: '-', name: 'oppositeName', code: 'oppositeNumber' },
+      7: { status: '提现失败', icon: '-', name: 'oppositeName', code: 'oppositeNumber' }
+    };
+    let phone = this.$route.query.p;
+    this.phone = `${phone.substr(0, 3)}****${phone.substr(7, 4)}`;
+    this.getOrderDetail();
+  },
+  methods: {
+    toWithdraw: function () {
+      // Webtrends.multiTrack({ argsa: ['WT.nv', 'gpas_index_withdraw', 'WT.event', 'gpas_btn_withdraw'] });
+      pageRouter(this, { path: '/withdraw', query: { p: this.$route.query.p, ptid: this.$route.query.ptid } });
+    },
+    toOrderList: function () {
+      pageRouter(this, { path: '/orderList', query: { p: this.$route.query.p, ptid: this.$route.query.ptid } });
+    },
+    round: function(val, n) {
+      var result = parseFloat(val);
+      if (!n && n !== 0) n = 2;
+      return Math.round(result * Math.pow(10, n)) / Math.pow(10, n);
+    },
+    roundKeep: function(val, n) {
+      var result = parseFloat(val);
+      if (!n && n !== 0) n = 2;
+      var resultStr = result.toString();
+      var dotPos = resultStr.indexOf('.');
+      if (dotPos < 0) {
+        dotPos = resultStr.length;
+        resultStr += '.';
       }
-      this.statusMapping = {
-        1: {status: '激活返利', icon: '+', name: 'packageName', code: 'cardNumber'},
-        2: {status: '充值返利', icon: '+', name: 'packageName', code: 'cardNumber'},
-        5: {status: '提现成功', icon: '-', name: 'oppositeName', code: 'oppositeNumber'},
-        6: {status: '提现中', icon: '-', name: 'oppositeName', code: 'oppositeNumber'},
-        7: {status: '提现失败', icon: '-', name: 'oppositeName', code: 'oppositeNumber'}
-      };
-      let phone = this.$route.query.p;
-      this.phone = `${phone.substr(0, 3)}****${phone.substr(7, 4)}`;
+      while (resultStr.length <= (dotPos + n)) {
+        resultStr += '0';
+      }
+      return resultStr;
+    },
+    pInt: function(val) {
+      return parseInt(val, 10);
+    },
+    loadMore: function() {
+      // 当最后一页时或者当页面正在加载下一页时，阻止访问接口
+      if (this.lastPage || this.isLoading || this.isNoRecord) return;
+      this.pageNumber++;
       this.getOrderDetail();
     },
-    methods: {
-      toWithdraw: function () {
-        // Webtrends.multiTrack({ argsa: ['WT.nv', 'gpas_index_withdraw', 'WT.event', 'gpas_btn_withdraw'] });
-        pageRouter(this, { path: '/withdraw', query: { p: this.$route.query.p, ptid: this.$route.query.ptid } });
-      },
-      toOrderList: function () {
-        pageRouter(this, { path: '/orderList', query: { p: this.$route.query.p, ptid: this.$route.query.ptid } });
-      },
-      round: function(val, n) {
-        var result = parseFloat(val);
-        if (!n && n !== 0) n = 2;
-        return Math.round(result * Math.pow(10, n)) / Math.pow(10, n);
-      },
-      roundKeep: function(val, n) {
-        var result = parseFloat(val);
-        if (!n && n !== 0) n = 2;
-        var resultStr = result.toString();
-        var dotPos = resultStr.indexOf('.');
-        if (dotPos < 0) {
-          dotPos = resultStr.length;
-          resultStr += '.';
-        }
-        while (resultStr.length <= (dotPos + n)) {
-          resultStr += '0';
-        }
-        return resultStr;
-      },
-      pInt: function(val) {
-        return parseInt(val, 10);
-      },
-      loadMore: function() {
-        // 当最后一页时或者当页面正在加载下一页时，阻止访问接口
-        if (this.lastPage || this.isLoading || this.isNoRecord) return;
-        this.pageNumber++;
-        this.getOrderDetail();
-      },
-      reloadList: function() {
-        if (!this.isNoRecord || this.isLoading) return;
-        this.pageNumber = 1;
-        this.getOrderDetail();
-      },
-      getOrderDetail: function() {
-        let url = baseUrl + '/packageSalary/detail';
-        // Indicator.open();
-        this.isLoading = true;
-        let params = Qs.stringify({
-          phone: this.$route.query.p,
-          pageNumber: this.pageNumber
+    reloadList: function() {
+      if (!this.isNoRecord || this.isLoading) return;
+      this.pageNumber = 1;
+      this.getOrderDetail();
+    },
+    getOrderDetail: function() {
+      let url = baseUrl + '/packageSalary/detail';
+      // Indicator.open();
+      this.isLoading = true;
+      let params = Qs.stringify({
+        phone: this.$route.query.p,
+        pageNumber: this.pageNumber
+      });
+      url = url + '?' + params;
+      let reqParams = getRequestParams(url, '', this.getOrderDetailSuc, this.getOrderDetailFail, '');
+      sendGetRequest(this, reqParams);
+    },
+    getOrderDetailSuc: function(vue, json) {
+      vue.isLoading = false;
+      if (vue.pageNumber === 1) {
+        vue.tradeList = [];
+      }
+      if (json && json.status === 0) {
+        let tradeList = [];
+        vue.lastPage = json.data.details.lastPage;
+        vue.pageNumber = json.data.details.pageNumber;
+        vue.isNoRecord = json.data.details.totalRow === 0;
+        vue.totalIncome = json.data.salary;
+        vue.orderNum = json.data.orderNum;
+        json.data.details.list.forEach((item, index) => {
+          let statusInfo = vue.statusMapping[item.type];
+          if (!statusInfo) {
+            return;
+          }
+          let isFail = false;
+          if ('' + item.type === '7') {
+            isFail = true;
+          }
+          let obj = {
+            name: item[statusInfo.name],
+            code: this.handleNumber(item[statusInfo.code]),
+            date: item.time,
+            status: statusInfo.status,
+            icon: statusInfo.icon,
+            cash: isNaN(Number(item.cash)) ? '0.00' : Number(item.cash).toFixed(2),
+            isFail: isFail
+          };
+          tradeList.push(obj);
         });
-        url = url + '?' + params;
-        let reqParams = getRequestParams(url, '', this.getOrderDetailSuc, this.getOrderDetailFail, '');
-        sendGetRequest(this, reqParams);
-      },
-      getOrderDetailSuc: function(vue, json) {
-        vue.isLoading = false;
-        if (vue.pageNumber === 1) {
-          vue.tradeList = [];
-        }
-        if (json && json.status === 0) {
-          let tradeList = [];
-          vue.lastPage = json.data.details.lastPage;
-          vue.pageNumber = json.data.details.pageNumber;
-          vue.isNoRecord = json.data.details.totalRow === 0;
-          vue.totalIncome = json.data.salary;
-          vue.orderNum = json.data.orderNum;
-          json.data.details.list.forEach((item, index) => {
-            let statusInfo = vue.statusMapping[item.type];
-            if (!statusInfo) {
-              return;
-            }
-            let isFail = false;
-            if ('' + item.type === '7') {
-              isFail = true;
-            }
-            let obj = {
-              name: item[statusInfo.name],
-              code: this.handleNumber(item[statusInfo.code]),
-              date: item.time,
-              status: statusInfo.status,
-              icon: statusInfo.icon,
-              cash: isNaN(Number(item.cash)) ? '0.00' : Number(item.cash).toFixed(2),
-              isFail: isFail
-            };
-            tradeList.push(obj);
-          });
-          vue.tradeList = vue.tradeList.concat(tradeList);
-        }
-      },
-      getOrderDetailFail: function(vue, ex) {
-        vue.isLoading = false;
-        Toast('异常：' + ex);
-      },
-      handleNumber: function(number) {
-        if (number && number.length >= 11) {
-          let length = number.length;
-          return `${number.substr(0, 3)}****${number.substr(length - 4, 4)}`;
-        }
+        vue.tradeList = vue.tradeList.concat(tradeList);
+      }
+    },
+    getOrderDetailFail: function(vue, ex) {
+      vue.isLoading = false;
+      Toast('异常：' + ex);
+    },
+    handleNumber: function(number) {
+      if (number && number.length >= 11) {
+        let length = number.length;
+        return `${number.substr(0, 3)}****${number.substr(length - 4, 4)}`;
       }
     }
-  };
+  }
+};
 </script>
 
-<style>
+<style lang="less">
   body {
     background: #F0F0F0;
   }
   .flex-row {
     display: -webkit-box;
     display: -webkit-flex;
-    display: box;
+    ;
     display: flex;
     display: -ms-flex;
   }
@@ -300,7 +300,7 @@
           position: absolute;
           top: 0;
           left: 90px;
-          padding: 8px 0 0; 
+          padding: 8px 0 0;
           line-height: 1.5;
           overflow: hidden;
           white-space: nowrap;
@@ -327,7 +327,7 @@
             }
           }
           .phone-no {
-            /*margin-top: 10px;*/ 
+            /*margin-top: 10px;*/
             font-size: 12px;
             color: #333;
             overflow: hidden;

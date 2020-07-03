@@ -11,98 +11,98 @@
   </div>
 </template>
 <script>
-  import { Indicator, MessageBox, Toast } from 'mint-ui';
+import { Indicator, MessageBox, Toast } from 'mint-ui';
 
-  export default {
-    props: {
-      dots: {
-        type: Array
-      },
-      days: {
-        type: [Number, String]
-      },
-      activeDotColor: {
-        type: String,
-        default: '#3d8cf7'
-      },
-      inactiveDotColor: {
-        type: String,
-        default: '#e1eff5'
-      },
-      activeFontColor: {
-        type: String,
-        default: '#fff'
-      },
-      inactiveFontColor: {
-        type: String,
-        default: '#728082'
-      },
-      lineColor: String,
-      namePosition: {
-        type: String,
-        default: 'middle'
-      },
-      lastDayImg: {
-        type: String,
-        default: ''
-      }
+export default {
+  props: {
+    dots: {
+      type: Array
     },
-    components: {
-      Indicator,
-      MessageBox,
-      Toast
+    days: {
+      type: [Number, String]
     },
-    data() {
-      return {
-        dotsName: [],
-        checkedDays: 0,
-        userActiveDotColor: '',
-        userInactiveDotColor: '',
-        userActiveFontColor: '',
-        userInactiveFontColor: '',
-        userLineColor: '',
-        userLastDayImg: this.lastDayImg
-      };
+    activeDotColor: {
+      type: String,
+      default: '#3d8cf7'
     },
-    computed: {
-      nameComputedPosition: function() {
-        if (this.namePosition === 'bottom') {
-          return 'position: absolute; left: 0; right: 0; margin: 0 auto; bottom: -34px; color: #333;';
-        }
-      }
+    inactiveDotColor: {
+      type: String,
+      default: '#e1eff5'
     },
-    watch: {
-      dots(val) {
-        this.dotsName = val;
-      },
-      days(val) {
-        this.checkedDays = val;
-      }
+    activeFontColor: {
+      type: String,
+      default: '#fff'
     },
-    created() {
-      console.log(this.dots);
-      this.dotsName = this.dots;
-      this.checkedDays = this.days;
-      this.userActiveDotColor = this.activeDotColor;
-      this.userInactiveDotColor = this.inactiveDotColor;
-      this.userActiveFontColor = this.activeFontColor;
-      this.userInactiveFontColor = this.inactiveFontColor;
-      this.userLineColor = this.lineColor || this.userActiveDotColor;
+    inactiveFontColor: {
+      type: String,
+      default: '#728082'
     },
-    mounted() {
-
+    lineColor: String,
+    namePosition: {
+      type: String,
+      default: 'middle'
     },
-    methods: {
-      dotComputedStyle: function (i) {
-        return i < this.checkedDays ? this.userActiveDotColor : this.userInactiveDotColor;
-      },
-      fontComputedStyle: function (i) {
-        return i < this.checkedDays ? this.userActiveFontColor : this.userInactiveFontColor;
+    lastDayImg: {
+      type: String,
+      default: ''
+    }
+  },
+  components: {
+    Indicator,
+    MessageBox,
+    Toast
+  },
+  data() {
+    return {
+      dotsName: [],
+      checkedDays: 0,
+      userActiveDotColor: '',
+      userInactiveDotColor: '',
+      userActiveFontColor: '',
+      userInactiveFontColor: '',
+      userLineColor: '',
+      userLastDayImg: this.lastDayImg
+    };
+  },
+  computed: {
+    nameComputedPosition: function() {
+      if (this.namePosition === 'bottom') {
+        return 'position: absolute; left: 0; right: 0; margin: 0 auto; bottom: -34px; color: #333;';
       }
     }
-  };
+  },
+  watch: {
+    dots(val) {
+      this.dotsName = val;
+    },
+    days(val) {
+      this.checkedDays = val;
+    }
+  },
+  created() {
+    console.log(this.dots);
+    this.dotsName = this.dots;
+    this.checkedDays = this.days;
+    this.userActiveDotColor = this.activeDotColor;
+    this.userInactiveDotColor = this.inactiveDotColor;
+    this.userActiveFontColor = this.activeFontColor;
+    this.userInactiveFontColor = this.inactiveFontColor;
+    this.userLineColor = this.lineColor || this.userActiveDotColor;
+  },
+  mounted() {
+
+  },
+  methods: {
+    dotComputedStyle: function (i) {
+      return i < this.checkedDays ? this.userActiveDotColor : this.userInactiveDotColor;
+    },
+    fontComputedStyle: function (i) {
+      return i < this.checkedDays ? this.userActiveFontColor : this.userInactiveFontColor;
+    }
+  }
+};
 </script>
-<style>
+<style lang="less">
   .check-in-root {
     width: 100%;
     position: relative;

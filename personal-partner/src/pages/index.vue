@@ -4,7 +4,7 @@
     <!-- <div class="showfirst" v-if="showfirst">
       <img class="showfirst-img" src="static/img/guide/guideLogo.png">
       <div class="showfirst-guide" @click="gotoGuide">第一次来？新手教程</div>
-      <div class="showfirst-index" @click="gotoIndex">跳过</div>  
+      <div class="showfirst-index" @click="gotoIndex">跳过</div>
     </div>
     <div v-if="showGuide" class="guide-img" @click="guideStart">
       <img :src="isZW ? zwGuide[num] : guide[num]">
@@ -1283,7 +1283,7 @@ function canvasTextAlignCenter (str, ctx, initY, drawWidth, totalWidth, lineHeig
 }
 </script>
 
-<style>
+<style lang="less">
 body {
   background: #f0f0f0;
 }
@@ -1403,7 +1403,7 @@ body {
         position: absolute;
         top: 0;
         left: 90px;
-        padding: 8px 0 0; 
+        padding: 8px 0 0;
         line-height: 1.5;
         overflow: hidden;
         white-space: nowrap;

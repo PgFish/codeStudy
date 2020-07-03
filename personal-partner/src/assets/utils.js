@@ -819,7 +819,7 @@ export function logout(vue, msg) {
   removeStorage('ptDetailInfo');
   if (sourceType === 'employee') {
     vue.$toast(msg || '登录超时，请重新登录');
-    pageRouter(vue, {path: '/emp'});
+    pageRouter(vue, { path: '/emp' });
     return;
   }
   vue.$messagebox.alert('登录超时，点击确定重新登录').then(() => {

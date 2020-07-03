@@ -67,196 +67,196 @@
 </template>
 
 <script>
-  import { baseUrl, getRequestParams, sendGetRequest, sendJsonPostRequestWithDES, getParamValue, decryptByDES, YEK_SED, pageRouter } from 'src/assets/utils.js';
-  import { Indicator, MessageBox, Toast } from 'mint-ui';
-  import Qs from 'qs';
-  export default {
-    components: {
-      Indicator,
-      MessageBox,
-      Toast
-    },
-    data() {
-      return {
-        userInfo: {},
-        isNowithdraw: false,
-        showPage: false,
-        amount: '',
-        statusInfo: {},
-        balance: 0,
-        minWithDrawCash: 20,
-        withdrawText: '提现金额需大于等于20',
-        withdrawRuleShow: false,
-        withdrawRuleContent: ''
-      };
-    },
-    watch: {
-      amount(val) {
-        // let maxAmount = 800;
-        // maxAmount = Number(this.balance) > 800 ? 800 : Number(this.balance);
-        let maxAmount = Number(this.balance);
-        if (Number(val) > maxAmount) {
-          this.amount = maxAmount;
-        }
-        if (Number(val) >= 1 && val.indexOf('0') === 0) {
-          this.amount = val.replace('0', '');
-        }
-        // if (val === '.') {
-        //   this.amount = '0.';
-        // }
-        let reg = /^\d+\.?\d{0,2}$/;
-        if (!reg.test(val)) {
-          this.amount = val.substr(0, val.length - 1);
-        }
-        // if (val)
+import { baseUrl, getRequestParams, sendGetRequest, sendJsonPostRequestWithDES, getParamValue, decryptByDES, YEK_SED, pageRouter } from 'src/assets/utils.js';
+import { Indicator, MessageBox, Toast } from 'mint-ui';
+import Qs from 'qs';
+export default {
+  components: {
+    Indicator,
+    MessageBox,
+    Toast
+  },
+  data() {
+    return {
+      userInfo: {},
+      isNowithdraw: false,
+      showPage: false,
+      amount: '',
+      statusInfo: {},
+      balance: 0,
+      minWithDrawCash: 20,
+      withdrawText: '提现金额需大于等于20',
+      withdrawRuleShow: false,
+      withdrawRuleContent: ''
+    };
+  },
+  watch: {
+    amount(val) {
+      // let maxAmount = 800;
+      // maxAmount = Number(this.balance) > 800 ? 800 : Number(this.balance);
+      let maxAmount = Number(this.balance);
+      if (Number(val) > maxAmount) {
+        this.amount = maxAmount;
       }
-    },
-    created() {
-      document.title = '酬金提现';
-      let params = decryptByDES.CBC(getParamValue('params'), YEK_SED);
-      if (params) {
-        this.userInfo = JSON.parse(params).userInfo;
+      if (Number(val) >= 1 && val.indexOf('0') === 0) {
+        this.amount = val.replace('0', '');
       }
-      this.statusMapping = {
-        '0': {
-          tips: '<p>提现未达到最低要求</p><p>继续加油哦~</p>',
-          src: 'static/img/withdraw/nowithdraw.png'
-        },
-        '5': {
-          tips: '<p>您今日提现次数已用完</p><p>请下个提现日再来吧~</p>',
-          src: 'static/img/withdraw/nowithdraw.png'
-        },
-        '6': {
-          tips: '<p>您有一笔提现正在处理中</p>',
-          src: 'static/img/withdraw/withdrawing.png'
-        }
-      };
-      this.judgeWithdraw();
-      this.getWithdrawRule();
-    },
-    methods: {
-      round: function(val, n) {
-        var result = parseFloat(val);
-        if (!n && n !== 0) n = 2;
-        return Math.round(result * Math.pow(10, n)) / Math.pow(10, n);
-      },
-      roundKeep: function(val, n) {
-        var result = parseFloat(val);
-        if (!n && n !== 0) n = 2;
-        var resultStr = result.toString();
-        var dotPos = resultStr.indexOf('.');
-        if (dotPos < 0) {
-          dotPos = resultStr.length;
-          resultStr += '.';
-        }
-        while (resultStr.length <= (dotPos + n)) {
-          resultStr += '0';
-        }
-        return resultStr;
-      },
-      pInt: function(val) {
-        return parseInt(val, 10);
-      },
-      judgeWithdraw: function() {
-        let url = baseUrl + '/packageSalary/salary';
-        let params = Qs.stringify({
-          phone: this.$route.query.p
-        });
-        url = url + '?' + params;
-        let reqParams = getRequestParams(url, '', this.judgeWithdrawSuc, this.judgeWithdrawFail, '');
-        Indicator.open();
-        sendGetRequest(this, reqParams);
-      },
-      judgeWithdrawSuc: function(vue, json) {
-        Indicator.close();
-        vue.showPage = true;
-        if (json && json.status === 0) {
-          vue.balance = json.data.salary;
-          vue.minWithDrawCash = json.data.minWithDrawCash === undefined ? 20 : json.data.minWithDrawCash;
-          vue.withdrawText = '提现金额需大于等于' + vue.minWithDrawCash;
-          if (json.data.salary < vue.minWithDrawCash || json.data.status !== 0) {
-            vue.statusInfo = vue.statusMapping[json.data.status];
-            vue.isNowithdraw = true;
-          } else {
-            vue.isNowithdraw = false;
-          }
-        }
-      },
-      judgeWithdrawFail: function(vue, ex) {
-        Indicator.close();
-        Toast('异常：' + ex);
-      },
-      withdraw: function() {
-        if (isNaN(Number(this.amount))) {
-          Toast('请输入提现金额');
-          return;
-        }
-        if (Number(this.amount) < this.minWithDrawCash) {
-          Toast('提现金额不能少于' + this.minWithDrawCash);
-          return;
-        }
-        let url = baseUrl + '/packageSalary/withdraw';
-        let params = {
-          phone: this.$route.query.p,
-          name: this.userInfo.nickname || '',
-          cash: this.amount,
-          flag: 0
-        };
-        let reqParams = getRequestParams(url, params, this.withdrawSuc, this.withdrawFail, '');
-        sendJsonPostRequestWithDES(this, reqParams);
-      },
-      withdrawSuc: function(vue, json) {
-        let msg = '提现成功';
-        if (json && json.status === 0) {
-          msg = '提现申请已提交';
-        } else {
-          msg = json.msg;
-        }
-        MessageBox.alert(msg).then(action => {
-          vue.backIndex();
-        });
-        // MessageBox.
-      },
-      withdrawFail: function(vue, ex) {
-        Toast('异常:' + ex);
-      },
-      gotoTradeDetail: function() {
-        pageRouter(this, {path: '/tradeDetail', query: {p: this.$route.query.p, ptid: this.$route.query.ptid}});
-      },
-      backIndex: function() {
-        window.history.back(-1);
-        // pageRouter(this, {path: '/index', query: {p: this.$route.query.p, ptid: this.$route.query.ptid}});
-      },
-      openWithdrawRule: function() {
-        this.withdrawRuleShow = true;
-      },
-      closeWithdrawRule: function() {
-        this.withdrawRuleShow = false;
-      },
-      getWithdrawRule: function() {
-        let url = baseUrl + '/richText/get';
-        let params = Qs.stringify({
-          code: 'WITHDRAW_RULE'
-        });
-        url = url + '?' + params;
-        let reqParams = getRequestParams(url, '', (vue, json) => {
-          Indicator.close();
-          if (json && '' + json.status === '0' && '' + json.data.enabled === '0') {
-            vue.withdrawRuleContent = json.data.detail;
-          } else {
-            vue.withdrawRuleContent = '';
-          }
-        }, (vue, ex) => {
-          Indicator.close();
-          vue.withdrawRuleContent = '';
-        }, '');
-        Indicator.open();
-        sendGetRequest(this, reqParams);
+      // if (val === '.') {
+      //   this.amount = '0.';
+      // }
+      let reg = /^\d+\.?\d{0,2}$/;
+      if (!reg.test(val)) {
+        this.amount = val.substr(0, val.length - 1);
       }
+      // if (val)
     }
-  };
+  },
+  created() {
+    document.title = '酬金提现';
+    let params = decryptByDES.CBC(getParamValue('params'), YEK_SED);
+    if (params) {
+      this.userInfo = JSON.parse(params).userInfo;
+    }
+    this.statusMapping = {
+      '0': {
+        tips: '<p>提现未达到最低要求</p><p>继续加油哦~</p>',
+        src: 'static/img/withdraw/nowithdraw.png'
+      },
+      '5': {
+        tips: '<p>您今日提现次数已用完</p><p>请下个提现日再来吧~</p>',
+        src: 'static/img/withdraw/nowithdraw.png'
+      },
+      '6': {
+        tips: '<p>您有一笔提现正在处理中</p>',
+        src: 'static/img/withdraw/withdrawing.png'
+      }
+    };
+    this.judgeWithdraw();
+    this.getWithdrawRule();
+  },
+  methods: {
+    round: function(val, n) {
+      var result = parseFloat(val);
+      if (!n && n !== 0) n = 2;
+      return Math.round(result * Math.pow(10, n)) / Math.pow(10, n);
+    },
+    roundKeep: function(val, n) {
+      var result = parseFloat(val);
+      if (!n && n !== 0) n = 2;
+      var resultStr = result.toString();
+      var dotPos = resultStr.indexOf('.');
+      if (dotPos < 0) {
+        dotPos = resultStr.length;
+        resultStr += '.';
+      }
+      while (resultStr.length <= (dotPos + n)) {
+        resultStr += '0';
+      }
+      return resultStr;
+    },
+    pInt: function(val) {
+      return parseInt(val, 10);
+    },
+    judgeWithdraw: function() {
+      let url = baseUrl + '/packageSalary/salary';
+      let params = Qs.stringify({
+        phone: this.$route.query.p
+      });
+      url = url + '?' + params;
+      let reqParams = getRequestParams(url, '', this.judgeWithdrawSuc, this.judgeWithdrawFail, '');
+      Indicator.open();
+      sendGetRequest(this, reqParams);
+    },
+    judgeWithdrawSuc: function(vue, json) {
+      Indicator.close();
+      vue.showPage = true;
+      if (json && json.status === 0) {
+        vue.balance = json.data.salary;
+        vue.minWithDrawCash = json.data.minWithDrawCash === undefined ? 20 : json.data.minWithDrawCash;
+        vue.withdrawText = '提现金额需大于等于' + vue.minWithDrawCash;
+        if (json.data.salary < vue.minWithDrawCash || json.data.status !== 0) {
+          vue.statusInfo = vue.statusMapping[json.data.status];
+          vue.isNowithdraw = true;
+        } else {
+          vue.isNowithdraw = false;
+        }
+      }
+    },
+    judgeWithdrawFail: function(vue, ex) {
+      Indicator.close();
+      Toast('异常：' + ex);
+    },
+    withdraw: function() {
+      if (isNaN(Number(this.amount))) {
+        Toast('请输入提现金额');
+        return;
+      }
+      if (Number(this.amount) < this.minWithDrawCash) {
+        Toast('提现金额不能少于' + this.minWithDrawCash);
+        return;
+      }
+      let url = baseUrl + '/packageSalary/withdraw';
+      let params = {
+        phone: this.$route.query.p,
+        name: this.userInfo.nickname || '',
+        cash: this.amount,
+        flag: 0
+      };
+      let reqParams = getRequestParams(url, params, this.withdrawSuc, this.withdrawFail, '');
+      sendJsonPostRequestWithDES(this, reqParams);
+    },
+    withdrawSuc: function(vue, json) {
+      let msg = '提现成功';
+      if (json && json.status === 0) {
+        msg = '提现申请已提交';
+      } else {
+        msg = json.msg;
+      }
+      MessageBox.alert(msg).then(action => {
+        vue.backIndex();
+      });
+      // MessageBox.
+    },
+    withdrawFail: function(vue, ex) {
+      Toast('异常:' + ex);
+    },
+    gotoTradeDetail: function() {
+      pageRouter(this, { path: '/tradeDetail', query: { p: this.$route.query.p, ptid: this.$route.query.ptid } });
+    },
+    backIndex: function() {
+      window.history.back(-1);
+      // pageRouter(this, {path: '/index', query: {p: this.$route.query.p, ptid: this.$route.query.ptid}});
+    },
+    openWithdrawRule: function() {
+      this.withdrawRuleShow = true;
+    },
+    closeWithdrawRule: function() {
+      this.withdrawRuleShow = false;
+    },
+    getWithdrawRule: function() {
+      let url = baseUrl + '/richText/get';
+      let params = Qs.stringify({
+        code: 'WITHDRAW_RULE'
+      });
+      url = url + '?' + params;
+      let reqParams = getRequestParams(url, '', (vue, json) => {
+        Indicator.close();
+        if (json && '' + json.status === '0' && '' + json.data.enabled === '0') {
+          vue.withdrawRuleContent = json.data.detail;
+        } else {
+          vue.withdrawRuleContent = '';
+        }
+      }, (vue, ex) => {
+        Indicator.close();
+        vue.withdrawRuleContent = '';
+      }, '');
+      Indicator.open();
+      sendGetRequest(this, reqParams);
+    }
+  }
+};
 </script>
-<style>
+<style lang="less">
   body {
     background: #F0F0F0;
   }
@@ -269,7 +269,7 @@
   .flex-row {
     display: -webkit-box;
     display: -webkit-flex;
-    display: box;
+    ;
     display: flex;
     display: -ms-flex;
   }

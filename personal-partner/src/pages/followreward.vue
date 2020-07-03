@@ -50,325 +50,135 @@
   </div>
 </template>
 <script>
-  import { getJsApiConfig, Constants, baseUrl, sendGetRequest, getRequestParams, getSession, sourceType, closeIllegalPage, closePage, encryptByDES, YEK_SED, sendJsonPostRequest, getStorage, saveStorage, removeSession, saveSession, pageRouter, isWechat } from 'src/assets/utils.js';
-  import { Indicator, MessageBox, Toast } from 'mint-ui';
+import { getJsApiConfig, Constants, baseUrl, sendGetRequest, getRequestParams, getSession, sourceType, closeIllegalPage, closePage, encryptByDES, YEK_SED, sendJsonPostRequest, getStorage, saveStorage, removeSession, saveSession, pageRouter, isWechat } from 'src/assets/utils.js';
+import { Indicator, MessageBox, Toast } from 'mint-ui';
 
-  export default {
-    components: {
-      Indicator,
-      MessageBox,
-      Toast
+export default {
+  components: {
+    Indicator,
+    MessageBox,
+    Toast
+  },
+  data() {
+    return {
+      phone: '',
+      sms: '',
+      ifAgree: false,
+      agreement: '',
+      showAgree: false,
+      submitText: '注册并领取流量',
+      signedUp: false,
+      showErrorPhoneMsg: false,
+      isSending: false,
+      smsTip: '获取验证码',
+      userInfo: {},
+      actInfo: {},
+      showRule: false,
+      isZW: false,
+      pageReady: false
+    };
+  },
+  watch: {
+    phone(val) {
+      this.showErrorPhoneMsg = !Constants.cmccMobileReg.test(val) && ('' + val).length === 11;
     },
-    data() {
-      return {
-        phone: '',
-        sms: '',
-        ifAgree: false,
-        agreement: '',
-        showAgree: false,
-        submitText: '注册并领取流量',
-        signedUp: false,
-        showErrorPhoneMsg: false,
-        isSending: false,
-        smsTip: '获取验证码',
-        userInfo: {},
-        actInfo: {},
-        showRule: false,
-        isZW: false,
-        pageReady: false
-      };
-    },
-    watch: {
-      phone(val) {
-        this.showErrorPhoneMsg = !Constants.cmccMobileReg.test(val) && ('' + val).length === 11;
-      },
-      isSending(val) {
-        if (val) {
-          let smsCnt = 60;
+    isSending(val) {
+      if (val) {
+        let smsCnt = 60;
+        this.smsTip = smsCnt + 's';
+        let timer = setInterval(() => {
+          smsCnt--;
           this.smsTip = smsCnt + 's';
-          let timer = setInterval(() => {
-            smsCnt--;
-            this.smsTip = smsCnt + 's';
-            if (smsCnt <= 0) {
-              clearInterval(timer);
-              this.isSending = false;
-            }
-          }, 1000);
-        } else {
-          this.smsTip = '获取验证码';
-        }
+          if (smsCnt <= 0) {
+            clearInterval(timer);
+            this.isSending = false;
+          }
+        }, 1000);
+      } else {
+        this.smsTip = '获取验证码';
       }
-    },
-    created() {
-      document.title = '移动合伙人关注有礼';
-      Indicator.close();
-      let shareObj = {
-        hideList: [
-          'menuItem:share:appMessage',
-          'menuItem:share:timeline',
-          'menuItem:share:qq',
-          'menuItem:share:weiboApp',
-          'menuItem:favorite',
-          'menuItem:share:facebook',
-          'menuItem:share:QZone',
-          'menuItem:editTag',
-          'menuItem:delete',
-          'menuItem:copyUrl',
-          'menuItem:originPage',
-          'menuItem:readMode',
-          'menuItem:openWithQQBrowser',
-          'menuItem:openWithSafari',
-          'menuItem:share:email'
-        ]
-      };
-      getJsApiConfig(shareObj);
+    }
+  },
+  created() {
+    document.title = '移动合伙人关注有礼';
+    Indicator.close();
+    let shareObj = {
+      hideList: [
+        'menuItem:share:appMessage',
+        'menuItem:share:timeline',
+        'menuItem:share:qq',
+        'menuItem:share:weiboApp',
+        'menuItem:favorite',
+        'menuItem:share:facebook',
+        'menuItem:share:QZone',
+        'menuItem:editTag',
+        'menuItem:delete',
+        'menuItem:copyUrl',
+        'menuItem:originPage',
+        'menuItem:readMode',
+        'menuItem:openWithQQBrowser',
+        'menuItem:openWithSafari',
+        'menuItem:share:email'
+      ]
+    };
+    getJsApiConfig(shareObj);
 
-      // let deadLineTime = new Date(2018, 11, 31, 23, 59, 59, 0).getTime();
-      // let currentTime = new Date().getTime();
-      // let expired = currentTime >= deadLineTime;
-      this.getActInfo();
-    },
-    mounted() {
-    },
-    methods: {
-      getActInfo: function() {
-        let url = `${baseUrl}/richText/get?code=ACT_FOLLOW_REWARD`;
-        let reqParams = getRequestParams(
-          url,
-          '',
-          (vue, json) => {
-            if (json.status === 0 && json.data) {
-              if ('' + json.data.enabled === '0') {
-                vue.actInfo = json.data;
-                console.log(vue.actInfo);
-                vue.pageReady = true;
-                vue.getIfBinded();
-              } else {
-                vue.pageReady = false;
-                MessageBox.alert('抱歉，活动已结束').then(() => {
-                  closePage();
-                }).catch(e => {
-                  closePage();
-                });
-              }
+    // let deadLineTime = new Date(2018, 11, 31, 23, 59, 59, 0).getTime();
+    // let currentTime = new Date().getTime();
+    // let expired = currentTime >= deadLineTime;
+    this.getActInfo();
+  },
+  mounted() {
+  },
+  methods: {
+    getActInfo: function() {
+      let url = `${baseUrl}/richText/get?code=ACT_FOLLOW_REWARD`;
+      let reqParams = getRequestParams(
+        url,
+        '',
+        (vue, json) => {
+          if (json.status === 0 && json.data) {
+            if ('' + json.data.enabled === '0') {
+              vue.actInfo = json.data;
+              console.log(vue.actInfo);
+              vue.pageReady = true;
+              vue.getIfBinded();
             } else {
-            }
-          },
-          (vue, ex) => {
-          }
-        );
-        sendGetRequest(this, reqParams);
-      },
-      getIfBinded: function() {
-        let srcInfo = getSession('ptSourceInfo', true);
-        console.log(srcInfo);
-        if (srcInfo) {
-          this.userInfo = srcInfo.userInfo;// let sourceId = this.srcInfo.openid;
-          if (sourceType === 'zhuangwei' || (sourceType === 'dzg' && !isWechat() && this.userInfo.realName)) {
-            this.isZW = true;
-          }
-          let url = `${baseUrl}/register/partner/${this.userInfo.openid}?sourceType=${sourceType}`; // 通过openid获取用户信息，是否绑定了手机号
-          console.log(url);
-          let reqParams = getRequestParams(
-            url,
-            '',
-            (vue, json) => {
-              Indicator.close();
-              console.log(json);
-              /*
-              * 查询用户是否绑定手机号的结果如下
-              */
-              Indicator.close();
-              if (json.status === 0) { // status=0 表示已经绑定了手机号，直接跳转到首页并带上手机号
-                if ('' + json.data.partner.partnerType === '9' && !this.isZW) {
-                  window.location.replace(`${window.location.origin + baseUrl}/zwregister/wx/oAuth/userInfo`);
-                  return;
-                }
-                saveSession('partnerticket', json.data.token);
-                saveSession('ptPublicOpenId', json.data.partner.openId);
-                saveSession('ptDetailInfo', json.data.partner);
-                vue.phone = json.data.partner.phone;
-                vue.submitText = '领取流量';
-                vue.signedUp = true;
-              } else if (json.status === 1) { // status=1 表示还未绑定手机号，无提示显示绑定页面
-                if (json.data && json.data.partner && json.data.partner.phone) {
-                  vue.phone = json.data.partner.phone;
-                  vue.submitText = '登录并领取流量';
-                  vue.signedUp = true;
-                }
-              } else if (json.status === 2) { // status=2 表示账号已锁定，不让其进入首页，待用户操作后关闭页面
-                MessageBox.alert(json.msg || '账号已被锁定，请联系管理员解锁').then(() => {
-                  closePage();
-                }).catch(e => {
-                  closePage();
-                });
-              } else if (json.status === 3) { // status=3 表示账号已经注销，需要重新绑定，提示并显示绑定页面
-              } else { // 其他情况，待用户操作后，直接关闭页面
-                MessageBox.alert('发生异常，请退出后重新进入页面').then(() => {
-                  closePage();
-                }).catch(e => {
-                  closePage();
-                });
-              }
-            },
-            (vue, ex) => {
-              Indicator.close();
-              Toast('网络异常');
-            }
-          );
-          Indicator.open();
-          sendGetRequest(this, reqParams);
-        } else {
-          closeIllegalPage(this);
-        }
-      },
-      getSms: function() {
-        if (!this.pageReady) {
-          MessageBox.alert('抱歉，活动已结束').then(() => {
-            closePage();
-          }).catch(e => {
-            closePage();
-          });
-          return;
-        }
-        if (!Constants.cmccMobileReg.test(this.phone)) {
-          if (('' + this.phone).length === 11) {
-            this.showErrorPhoneMsg = true;
-          }
-          Toast({message: '请输入正确的移动手机号', duration: 1200});
-          return;
-        }
-        if (this.isSending) {
-          Toast({message: `请等待${this.smsTip}`, duration: 1200});
-          return;
-        }
-        let url = `${baseUrl}/verifyCode/sendCmcc`;
-        let params = {
-          'phone': encryptByDES.CBC('' + this.phone, YEK_SED)
-        };
-        let reqParams = getRequestParams(url, params, (vue, json) => {
-          Indicator.close();
-          if (json.status === 0) {
-            vue.isSending = true;
-            Toast(json.msg || '短信验证码发送成功');
-          } else if (json.status === 1) {
-            vue.showErrorPhoneMsg = true;
-          } else {
-            Toast(json.msg || '短信验证码发送失败，请重试');
-          }
-        }, (vue, ex) => {
-          Indicator.close();
-          Toast('网络异常，短信验证码发送失败');
-        }, '');
-        Indicator.open();
-        this.showErrorPhoneMsg = false;
-        sendJsonPostRequest(this, reqParams);
-      },
-      submit: function() {
-        if (!this.pageReady) {
-          MessageBox.alert('抱歉，活动已结束').then(() => {
-            closePage();
-          }).catch(e => {
-            closePage();
-          });
-          return;
-        }
-        if (!this.actInfo.remark || !this.actInfo.name) {
-          MessageBox.alert('未获取到活动信息，请联系管理员');
-          return;
-        }
-        if (!Constants.cmccMobileReg.test(this.phone)) {
-          if (('' + this.phone).length === 11) {
-            this.showErrorPhoneMsg = true;
-          }
-          Toast({message: '请输入正确的移动手机号', duration: 1200});
-          return;
-        }
-        if (!(/\d{6}/.test(this.sms))) {
-          Toast({message: '请输入6位数字验证码！', duration: 1200});
-          return;
-        }
-        if (!this.ifAgree) {
-          Toast({message: '请阅读并同意《四川移动合伙人协议》', duration: 1200});
-          return;
-        }
-        if (this.isSubmitting) {
-          Toast({message: `请勿重复提交！`, duration: 1200});
-          return;
-        }
-        let url = `${baseUrl}/register/partner/bindingTariff`;
-        let params = {
-          'regisiter': {
-            'phone': '' + this.phone,
-            'openId': this.userInfo.openid,
-            'sourceType': sourceType,
-            'verifyCode': '' + this.sms
-          },
-          'nickName': this.userInfo.nickname,
-          'headImg': this.userInfo.headimgurl,
-          'tariff': {
-            'SALE_TYPE': '1',
-            'EMP_INFO': {
-              'EMP_CODE': 'ob0086',
-              'PHONE_NO': '' + this.phone
-            },
-            'VERIFY_INFO': {
-              'CODE': '' + this.sms,
-              'TYPE': '1'
-            },
-            'SERVICE_INFO': {
-              'PHONE_NO': '' + this.phone
-            },
-            'TARIFF_INFO': {
-              'CODE': this.actInfo.remark,
-              'ACTIVE_CODE': this.actInfo.remark,
-              'FLAG_CODE': '1',
-              'TYPE': 'ADD_MODE',
-              'NAME': this.actInfo.name
-            },
-            'MEMBER_USER_NAME': '13880451171',
-            'omitBusinessCodeCheck': 'omit',
-            'omitSmsCheck': 'omit'
-          }
-        };
-        let reqParams = getRequestParams(
-          url,
-          params,
-          (vue, json) => {
-            console.log(json);
-            if (json.status === 0) {
-              vue.getServerUserInfo('您已成功领取2G流量，赶快分享给好友吧！', '恭喜，领取成功！');
-            } else if (json.status === 3) {
-              Indicator.close();
-              MessageBox.alert(json.msg || '验证码不正确', '抱歉，领取失败！').then(() => {
-                vue.sms = '';
+              vue.pageReady = false;
+              MessageBox.alert('抱歉，活动已结束').then(() => {
+                closePage();
               }).catch(e => {
-                vue.sms = '';
+                closePage();
               });
-            } else {
-              // MessageBox.alert(json.msg || '领取流量失败！ ');
-              vue.getServerUserInfo(json.msg || '领取流量失败！', '抱歉，领取失败！');
             }
-          },
-          (vue, ex) => {
-            Indicator.close();
-            Toast('网络异常，请重试');
+          } else {
           }
-        );
-        Indicator.open('办理中');
-        sendJsonPostRequest(this, reqParams);
-        console.log(url, params);
-      },
-      getServerUserInfo: function(message, title) {
+        },
+        (vue, ex) => {
+        }
+      );
+      sendGetRequest(this, reqParams);
+    },
+    getIfBinded: function() {
+      let srcInfo = getSession('ptSourceInfo', true);
+      console.log(srcInfo);
+      if (srcInfo) {
+        this.userInfo = srcInfo.userInfo;// let sourceId = this.srcInfo.openid;
+        if (sourceType === 'zhuangwei' || (sourceType === 'dzg' && !isWechat() && this.userInfo.realName)) {
+          this.isZW = true;
+        }
         let url = `${baseUrl}/register/partner/${this.userInfo.openid}?sourceType=${sourceType}`; // 通过openid获取用户信息，是否绑定了手机号
         console.log(url);
-        let reqParams = getRequestParams(url,
+        let reqParams = getRequestParams(
+          url,
           '',
           (vue, json) => {
             Indicator.close();
+            console.log(json);
             /*
-            * 查询用户是否绑定手机号的结果如下
-            */
+              * 查询用户是否绑定手机号的结果如下
+              */
+            Indicator.close();
             if (json.status === 0) { // status=0 表示已经绑定了手机号，直接跳转到首页并带上手机号
               if ('' + json.data.partner.partnerType === '9' && !this.isZW) {
                 window.location.replace(`${window.location.origin + baseUrl}/zwregister/wx/oAuth/userInfo`);
@@ -377,23 +187,202 @@
               saveSession('partnerticket', json.data.token);
               saveSession('ptPublicOpenId', json.data.partner.openId);
               saveSession('ptDetailInfo', json.data.partner);
-              MessageBox.alert(message, title).then(() => {
-                Indicator.open();
-                let routeQry = {p: json.data.partner.phone, ptid: json.data.partner.id, from: 'followreward'};
-                vue.gotoIndex(vue, {path: '/index', query: routeQry}, 'replace');
-              });
-            } else { // 其他情况，待用户操作后，直接关闭页面
-              MessageBox.alert('发生异常，请退出后重新进入页面').then(() => {
-                removeSession('partnerticket');
+              vue.phone = json.data.partner.phone;
+              vue.submitText = '领取流量';
+              vue.signedUp = true;
+            } else if (json.status === 1) { // status=1 表示还未绑定手机号，无提示显示绑定页面
+              if (json.data && json.data.partner && json.data.partner.phone) {
+                vue.phone = json.data.partner.phone;
+                vue.submitText = '登录并领取流量';
+                vue.signedUp = true;
+              }
+            } else if (json.status === 2) { // status=2 表示账号已锁定，不让其进入首页，待用户操作后关闭页面
+              MessageBox.alert(json.msg || '账号已被锁定，请联系管理员解锁').then(() => {
                 closePage();
               }).catch(e => {
-                removeSession('partnerticket');
+                closePage();
+              });
+            } else if (json.status === 3) { // status=3 表示账号已经注销，需要重新绑定，提示并显示绑定页面
+            } else { // 其他情况，待用户操作后，直接关闭页面
+              MessageBox.alert('发生异常，请退出后重新进入页面').then(() => {
+                closePage();
+              }).catch(e => {
                 closePage();
               });
             }
           },
           (vue, ex) => {
             Indicator.close();
+            Toast('网络异常');
+          }
+        );
+        Indicator.open();
+        sendGetRequest(this, reqParams);
+      } else {
+        closeIllegalPage(this);
+      }
+    },
+    getSms: function() {
+      if (!this.pageReady) {
+        MessageBox.alert('抱歉，活动已结束').then(() => {
+          closePage();
+        }).catch(e => {
+          closePage();
+        });
+        return;
+      }
+      if (!Constants.cmccMobileReg.test(this.phone)) {
+        if (('' + this.phone).length === 11) {
+          this.showErrorPhoneMsg = true;
+        }
+        Toast({ message: '请输入正确的移动手机号', duration: 1200 });
+        return;
+      }
+      if (this.isSending) {
+        Toast({ message: `请等待${this.smsTip}`, duration: 1200 });
+        return;
+      }
+      let url = `${baseUrl}/verifyCode/sendCmcc`;
+      let params = {
+        'phone': encryptByDES.CBC('' + this.phone, YEK_SED)
+      };
+      let reqParams = getRequestParams(url, params, (vue, json) => {
+        Indicator.close();
+        if (json.status === 0) {
+          vue.isSending = true;
+          Toast(json.msg || '短信验证码发送成功');
+        } else if (json.status === 1) {
+          vue.showErrorPhoneMsg = true;
+        } else {
+          Toast(json.msg || '短信验证码发送失败，请重试');
+        }
+      }, (vue, ex) => {
+        Indicator.close();
+        Toast('网络异常，短信验证码发送失败');
+      }, '');
+      Indicator.open();
+      this.showErrorPhoneMsg = false;
+      sendJsonPostRequest(this, reqParams);
+    },
+    submit: function() {
+      if (!this.pageReady) {
+        MessageBox.alert('抱歉，活动已结束').then(() => {
+          closePage();
+        }).catch(e => {
+          closePage();
+        });
+        return;
+      }
+      if (!this.actInfo.remark || !this.actInfo.name) {
+        MessageBox.alert('未获取到活动信息，请联系管理员');
+        return;
+      }
+      if (!Constants.cmccMobileReg.test(this.phone)) {
+        if (('' + this.phone).length === 11) {
+          this.showErrorPhoneMsg = true;
+        }
+        Toast({ message: '请输入正确的移动手机号', duration: 1200 });
+        return;
+      }
+      if (!(/\d{6}/.test(this.sms))) {
+        Toast({ message: '请输入6位数字验证码！', duration: 1200 });
+        return;
+      }
+      if (!this.ifAgree) {
+        Toast({ message: '请阅读并同意《四川移动合伙人协议》', duration: 1200 });
+        return;
+      }
+      if (this.isSubmitting) {
+        Toast({ message: `请勿重复提交！`, duration: 1200 });
+        return;
+      }
+      let url = `${baseUrl}/register/partner/bindingTariff`;
+      let params = {
+        'regisiter': {
+          'phone': '' + this.phone,
+          'openId': this.userInfo.openid,
+          'sourceType': sourceType,
+          'verifyCode': '' + this.sms
+        },
+        'nickName': this.userInfo.nickname,
+        'headImg': this.userInfo.headimgurl,
+        'tariff': {
+          'SALE_TYPE': '1',
+          'EMP_INFO': {
+            'EMP_CODE': 'ob0086',
+            'PHONE_NO': '' + this.phone
+          },
+          'VERIFY_INFO': {
+            'CODE': '' + this.sms,
+            'TYPE': '1'
+          },
+          'SERVICE_INFO': {
+            'PHONE_NO': '' + this.phone
+          },
+          'TARIFF_INFO': {
+            'CODE': this.actInfo.remark,
+            'ACTIVE_CODE': this.actInfo.remark,
+            'FLAG_CODE': '1',
+            'TYPE': 'ADD_MODE',
+            'NAME': this.actInfo.name
+          },
+          'MEMBER_USER_NAME': '13880451171',
+          'omitBusinessCodeCheck': 'omit',
+          'omitSmsCheck': 'omit'
+        }
+      };
+      let reqParams = getRequestParams(
+        url,
+        params,
+        (vue, json) => {
+          console.log(json);
+          if (json.status === 0) {
+            vue.getServerUserInfo('您已成功领取2G流量，赶快分享给好友吧！', '恭喜，领取成功！');
+          } else if (json.status === 3) {
+            Indicator.close();
+            MessageBox.alert(json.msg || '验证码不正确', '抱歉，领取失败！').then(() => {
+              vue.sms = '';
+            }).catch(e => {
+              vue.sms = '';
+            });
+          } else {
+            // MessageBox.alert(json.msg || '领取流量失败！ ');
+            vue.getServerUserInfo(json.msg || '领取流量失败！', '抱歉，领取失败！');
+          }
+        },
+        (vue, ex) => {
+          Indicator.close();
+          Toast('网络异常，请重试');
+        }
+      );
+      Indicator.open('办理中');
+      sendJsonPostRequest(this, reqParams);
+      console.log(url, params);
+    },
+    getServerUserInfo: function(message, title) {
+      let url = `${baseUrl}/register/partner/${this.userInfo.openid}?sourceType=${sourceType}`; // 通过openid获取用户信息，是否绑定了手机号
+      console.log(url);
+      let reqParams = getRequestParams(url,
+        '',
+        (vue, json) => {
+          Indicator.close();
+          /*
+            * 查询用户是否绑定手机号的结果如下
+            */
+          if (json.status === 0) { // status=0 表示已经绑定了手机号，直接跳转到首页并带上手机号
+            if ('' + json.data.partner.partnerType === '9' && !this.isZW) {
+              window.location.replace(`${window.location.origin + baseUrl}/zwregister/wx/oAuth/userInfo`);
+              return;
+            }
+            saveSession('partnerticket', json.data.token);
+            saveSession('ptPublicOpenId', json.data.partner.openId);
+            saveSession('ptDetailInfo', json.data.partner);
+            MessageBox.alert(message, title).then(() => {
+              Indicator.open();
+              let routeQry = { p: json.data.partner.phone, ptid: json.data.partner.id, from: 'followreward' };
+              vue.gotoIndex(vue, { path: '/index', query: routeQry }, 'replace');
+            });
+          } else { // 其他情况，待用户操作后，直接关闭页面
             MessageBox.alert('发生异常，请退出后重新进入页面').then(() => {
               removeSession('partnerticket');
               closePage();
@@ -402,89 +391,100 @@
               closePage();
             });
           }
-        );
-        sendGetRequest(this, reqParams);
-      },
-      gotoIndex: function(that, routeObj, routeType) {
-        let url = baseUrl + '/companion/version?phone=' + routeObj.query.p;
-        let reqParams = getRequestParams(
-          url,
-          '',
-          (vue, json) => {
-            Indicator.close();
-            if (json && json.status === 0) {
-              let ptreddots = getStorage('ptreddots_' + routeObj.query.p, true);
-              if (ptreddots) {
-                if (json.data.introduce && ptreddots.introduce !== json.data.introduce) {
-                  saveStorage('pt_shop_introduce_red_dot_' + routeObj.query.p, true);
-                }
-                if (json.data.rule && ptreddots.rule !== json.data.rule) {
-                  saveStorage('pt_shop_rule_red_dot_' + routeObj.query.p, true);
-                }
-                if (json.data.salary && ptreddots.salary !== json.data.salary) {
-                  saveStorage('pt_order_1_red_dot_' + routeObj.query.p, true);
-                  saveStorage('pt_trade_red_dot_' + routeObj.query.p, true);
-                }
-              } else {
+        },
+        (vue, ex) => {
+          Indicator.close();
+          MessageBox.alert('发生异常，请退出后重新进入页面').then(() => {
+            removeSession('partnerticket');
+            closePage();
+          }).catch(e => {
+            removeSession('partnerticket');
+            closePage();
+          });
+        }
+      );
+      sendGetRequest(this, reqParams);
+    },
+    gotoIndex: function(that, routeObj, routeType) {
+      let url = baseUrl + '/companion/version?phone=' + routeObj.query.p;
+      let reqParams = getRequestParams(
+        url,
+        '',
+        (vue, json) => {
+          Indicator.close();
+          if (json && json.status === 0) {
+            let ptreddots = getStorage('ptreddots_' + routeObj.query.p, true);
+            if (ptreddots) {
+              if (json.data.introduce && ptreddots.introduce !== json.data.introduce) {
                 saveStorage('pt_shop_introduce_red_dot_' + routeObj.query.p, true);
-                saveStorage('pt_shop_rule_red_dot_' + routeObj.query.p, true);
-                // saveStorage('pt_order_1_red_dot', true);
-                // saveStorage('pt_trade_red_dot', true);
               }
-              saveStorage('ptreddots_' + routeObj.query.p, json.data);
+              if (json.data.rule && ptreddots.rule !== json.data.rule) {
+                saveStorage('pt_shop_rule_red_dot_' + routeObj.query.p, true);
+              }
+              if (json.data.salary && ptreddots.salary !== json.data.salary) {
+                saveStorage('pt_order_1_red_dot_' + routeObj.query.p, true);
+                saveStorage('pt_trade_red_dot_' + routeObj.query.p, true);
+              }
+            } else {
+              saveStorage('pt_shop_introduce_red_dot_' + routeObj.query.p, true);
+              saveStorage('pt_shop_rule_red_dot_' + routeObj.query.p, true);
+              // saveStorage('pt_order_1_red_dot', true);
+              // saveStorage('pt_trade_red_dot', true);
             }
-            pageRouter(that, routeObj, routeType);
-          },
-          (vue, ex) => {
-            Indicator.close();
-            console.log(ex);
-            pageRouter(that, routeObj, routeType);
+            saveStorage('ptreddots_' + routeObj.query.p, json.data);
           }
-        );
-        sendGetRequest(this, reqParams);
-      },
-      getAgree: function() {
-        if (this.agreement) {
-          this.showAgree = true;
-          return;
+          pageRouter(that, routeObj, routeType);
+        },
+        (vue, ex) => {
+          Indicator.close();
+          console.log(ex);
+          pageRouter(that, routeObj, routeType);
         }
-        let url = `${baseUrl}/richText/get?code=PARTNER_AGREEMENT`;
-        let reqParams = getRequestParams(url, '', this.getAgreeSuc, this.getAgreeFail);
-        Indicator.open();
-        sendGetRequest(this, reqParams);
-      },
-      getAgreeSuc: function(vue, json) {
-        Indicator.close();
-        console.log(json);
-        if (json.status === 0 && json.data && ('' + json.data.enabled === '0')) {
-          vue.agreement = json.data.detail;
-          vue.showAgree = true;
-        } else {
-          MessageBox.alert('获取协议失败');
-        }
-      },
-      getAgreeFail: function(vue, ex) {
-        Indicator.close();
-        console.log(ex);
-        MessageBox.alert('获取协议异常，请重试');
-      },
-      openAgree: function() {
+      );
+      sendGetRequest(this, reqParams);
+    },
+    getAgree: function() {
+      if (this.agreement) {
         this.showAgree = true;
-      },
-      closeAgree: function() {
-        this.showAgree = false;
-      },
-      clickDisagree: function() {
-        this.ifAgree = false;
-        this.closeAgree();
-      },
-      clickAgree: function() {
-        this.closeAgree();
+        return;
       }
+      let url = `${baseUrl}/richText/get?code=PARTNER_AGREEMENT`;
+      let reqParams = getRequestParams(url, '', this.getAgreeSuc, this.getAgreeFail);
+      Indicator.open();
+      sendGetRequest(this, reqParams);
+    },
+    getAgreeSuc: function(vue, json) {
+      Indicator.close();
+      console.log(json);
+      if (json.status === 0 && json.data && ('' + json.data.enabled === '0')) {
+        vue.agreement = json.data.detail;
+        vue.showAgree = true;
+      } else {
+        MessageBox.alert('获取协议失败');
+      }
+    },
+    getAgreeFail: function(vue, ex) {
+      Indicator.close();
+      console.log(ex);
+      MessageBox.alert('获取协议异常，请重试');
+    },
+    openAgree: function() {
+      this.showAgree = true;
+    },
+    closeAgree: function() {
+      this.showAgree = false;
+    },
+    clickDisagree: function() {
+      this.ifAgree = false;
+      this.closeAgree();
+    },
+    clickAgree: function() {
+      this.closeAgree();
     }
-  };
+  }
+};
 </script>
-<style>
+<style lang="less">
   .follow-reward {
     min-height: 100%;
     width: 100%;

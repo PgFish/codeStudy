@@ -13,7 +13,7 @@ const getters = {
 };
 
 const actions = {
-  [types.BASE_BANNERS_ACTION] ({commit, state}, vue) {
+  [types.BASE_BANNERS_ACTION] ({ commit, state }, vue) {
     commit(types.BASE_BANNERS_REQUEST);
     let url = Constants.apiV2Host + '/StoreServer/NewsInfo/GainAdvertisementList?token=' + getLoginInfo('token') + '&serverType=1';
     let reqParams = getRequestParams(url, '', (payload) => commit(types.BASE_BANNERS_SUCCESS, payload), (payload) => commit(types.BASE_BANNERS_FAILURE, payload), '');

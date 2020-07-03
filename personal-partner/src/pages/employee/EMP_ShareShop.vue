@@ -94,389 +94,389 @@
   </div>
 </template>
 <script>
-  import { baseUrl, getRequestParams, sendGetRequest, decryptByDES, YEK_SED, isWechatBoolean, handleShare, getJsApiConfig, showMenuItems, pageRouter, getSession, saveSession, isIOS } from 'src/assets/utils';
-  import { Indicator, MessageBox, Toast } from 'mint-ui';
-  import QRCode from 'qrcode';
+import { baseUrl, getRequestParams, sendGetRequest, decryptByDES, YEK_SED, isWechatBoolean, handleShare, getJsApiConfig, showMenuItems, pageRouter, getSession, saveSession, isIOS } from 'src/assets/utils';
+import { Indicator, MessageBox, Toast } from 'mint-ui';
+import QRCode from 'qrcode';
 
-  export default {
-    components: {
-      Indicator,
-      MessageBox,
-      Toast
-    },
-    data() {
-      return {
-        ptUserInfo: {},
-        phone: '',
-        realName: '',
-        list: [],
-        lastPage: false,
-        isLoading: true,
-        expandArr: [],
-        currentShareFee: {},
-        tipShow: false,
-        qrcodeShow: false,
-        partnerId: '',
-        selectedCategory: '',
-        advertisement: {},
-        isAdsShow: true,
-        headPicture: '',
-        isIOS: isIOS()
-      };
-    },
-    watch: {
+export default {
+  components: {
+    Indicator,
+    MessageBox,
+    Toast
+  },
+  data() {
+    return {
+      ptUserInfo: {},
+      phone: '',
+      realName: '',
+      list: [],
+      lastPage: false,
+      isLoading: true,
+      expandArr: [],
+      currentShareFee: {},
+      tipShow: false,
+      qrcodeShow: false,
+      partnerId: '',
+      selectedCategory: '',
+      advertisement: {},
+      isAdsShow: true,
+      headPicture: '',
+      isIOS: isIOS()
+    };
+  },
+  watch: {
 
-    },
-    created() {
-      Indicator.close();
-      document.title = '店铺';
-      this.partnerId = this.$route.query.ptid;
-      let phone = decryptByDES.CBC('' + this.$route.query.p, YEK_SED);
-      if (phone.length === 11) {
-        this.phone = `${phone.substr(0, 3)}****${phone.substr(7, 4)}`;
-        this.getList();
-      } else {
-        document.title = 'Error';
+  },
+  created() {
+    Indicator.close();
+    document.title = '店铺';
+    this.partnerId = this.$route.query.ptid;
+    let phone = decryptByDES.CBC('' + this.$route.query.p, YEK_SED);
+    if (phone.length === 11) {
+      this.phone = `${phone.substr(0, 3)}****${phone.substr(7, 4)}`;
+      this.getList();
+    } else {
+      document.title = 'Error';
+    }
+    console.log(this.phone, this.partnerId);
+    this.countRecord();
+    // this.getAds();
+  },
+  mounted() {
+
+  },
+  methods: {
+    getAds: function() {
+      if (getSession('shareshop_ads')) {
+        this.advertisement = getSession('shareshop_ads', true);
+        return;
       }
-      console.log(this.phone, this.partnerId);
-      this.countRecord();
-      // this.getAds();
-    },
-    mounted() {
-
-    },
-    methods: {
-      getAds: function() {
-        if (getSession('shareshop_ads')) {
-          this.advertisement = getSession('shareshop_ads', true);
-          return;
-        }
-        let url = `${baseUrl}/common/getSystemConfig?typeCode=SHOP_SHARE_ADS`;
-        let reqParams = getRequestParams(
-          url,
-          '',
-          (vue, json) => {
-            console.log(json);
-            if (json && json.status === 0 && json.data.length > 0) {
-              vue.advertisement = json.data[0];
-              saveSession('shareshop_ads', vue.advertisement);
-            }
-          },
-          (vue, ex) => {
-            console.log(ex);
+      let url = `${baseUrl}/common/getSystemConfig?typeCode=SHOP_SHARE_ADS`;
+      let reqParams = getRequestParams(
+        url,
+        '',
+        (vue, json) => {
+          console.log(json);
+          if (json && json.status === 0 && json.data.length > 0) {
+            vue.advertisement = json.data[0];
+            saveSession('shareshop_ads', vue.advertisement);
           }
-        );
-        sendGetRequest(this, reqParams);
-      },
-      closeAds: function(e) {
-        this.prevDef(e);
-        console.log('closeAds');
-        this.isAdsShow = false;
-      },
-      goImgLink: function(e) {
-        this.prevDef(e);
-        if (!/^http/.test(this.advertisement.value)) {
-          return;
+        },
+        (vue, ex) => {
+          console.log(ex);
         }
-        this.advertisement.value = this.advertisement.value.replace(/\/gpas/i, baseUrl);
-        let url = this.advertisement.value;
-        window.location.href = url;
-      },
-      categoryChange: function(categoryId) {
-        this.selectedCategory = categoryId;
-      },
-      countRecord: function() {
-        let phoneNumber = this.$route.query.p;
-        let shareUrl = `${window.location.origin + baseUrl}/common/new/redirect?to=emp/shareshop&p=${phoneNumber}&ptid=${this.partnerId}`;
-        console.log(shareUrl);
-        let obj = {
-          title: '为你推荐一款超值业务，点击可享更多流量和套餐优惠哟',
-          desc: '更多精彩超值业务，等你来办！',
-          link: shareUrl,
-          imgUrl: `${window.location.origin + baseUrl}/partner/static/img/employee/cmcc.png`
-        };
-        getJsApiConfig(obj);
-        if (getSession('shareshop_cnt')) return;
-        saveSession('shareshop_cnt', '1');
-        let url = `${baseUrl}/shareStatistics/statisticShare?phoneNumber=${phoneNumber}&type=2`; // type=1表示点击分享按钮，type=2表示进入分享页面
-        let reqParams = getRequestParams(url); // 统计不需要处理返回值
-        sendGetRequest(this, reqParams);
-      },
-      prevDef: function (e) {
-        e.stopPropagation();
-        e.preventDefault();
-      },
-      round: function (val, n) {
-        var result = parseFloat(val);
-        if (!n && n !== 0) n = 2;
-        return Math.round(result * Math.pow(10, n)) / Math.pow(10, n);
-      },
-      roundKeep: function (val, n) {
-        var result = parseFloat(val);
-        if (!n && n !== 0) n = 2;
-        var resultStr = result.toString();
-        var dotPos = resultStr.indexOf('.');
-        if (dotPos < 0) {
-          dotPos = resultStr.length;
-          resultStr += '.';
-        }
-        while (resultStr.length <= (dotPos + n)) {
-          resultStr += '0';
-        }
-        return resultStr;
-      },
-      pInt: function (val) {
-        return parseInt(val, 10);
-      },
-      getList: function() {
-        let url = `${baseUrl}/packageSalary/listForShare?phone=${this.$route.query.p}`;
-        let reqParams = getRequestParams(
-          url,
-          '',
-          (vue, json) => {
-            vue.isLoading = false;
-            Indicator.close();
-            console.log(json);
-            if (json.status !== 0) {
-              Toast(json.msg || '没有可选的资费');
-              return;
-            }
-            vue.ptUserInfo = {
-              'headimgurl': json.data.headImg,
-              'phone': json.data.phone
-            };
-            let newImg = new Image();
-            newImg.src = vue.ptUserInfo.headimgurl;
-            newImg.onload = () => {
-              vue.headPicture = vue.ptUserInfo.headimgurl;
-            };
-            newImg.onerror = () => {
-              console.info('图片加载失败');
-              vue.headPicture = 'static/img/cmcc_logo.png';
-            };
-            vue.list = vue.list.concat(json.data.categoryList);
-            if (vue.list.length > 0) {
-              vue.selectedCategory = vue.list[0].id;
-            }
-          },
-          (vue, ex) => {
-            vue.isLoading = false;
-            Toast('网络异常');
-            Indicator.close();
-          }
-        );
-        sendGetRequest(this, reqParams);
-      },
-      expand: function (e, index, fee) {
-        e.stopPropagation();
-        // Webtrends.multiTrack({ argsa: ['WT.nv', 'gpas_index_dataBtn', 'WT.event', 'gpas_btn_data_' + fee.id] });
-        var findIndex = this.expandArr.indexOf(index);
-        if (findIndex >= 0) {
-          this.expandArr.splice(findIndex, 1);
-        } else {
-          this.expandArr.push(index);
-        }
-      },
-      jump: function (url, feeId, categoryId) {
-        // Webtrends.multiTrack({ argsa: ['WT.nv', 'gpas_index_feeType', 'WT.event', 'gpas_feeId_' + feeId] });
-        if ('' + categoryId === '1') { // 0元号卡资费，跳转本地页面
-          let jumpUrl = this.buildUrl(url);
-          window.location.href = jumpUrl;
-        } else if ('' + categoryId === '2') { // 特惠流量，跳转本地页面
-          pageRouter(this, { path: '/handlesuperflow', query: { id: feeId, partnerId: this.$route.query.ptid } });
-        } else if ('' + categoryId === '5') { // 合家欢，跳转本地页面
-          pageRouter(this, { path: '/familyDetail', query: { id: feeId, partnerId: this.$route.query.ptid } });
-        } else {
-          pageRouter(this, { path: '/feedetail', query: { id: feeId, partnerId: this.$route.query.ptid } });
-        }
-      },
-      share: function (e, fee, categoryId) {
-        e.stopPropagation();
-        // Webtrends.multiTrack({ argsa: ['WT.nv', 'gpas_index_shareBtn', 'WT.event', 'gpas_btn_share_' + fee.id] });
-        let shareUrl = this.buildUrl(fee.publicUrl);
-        if ('' + categoryId !== '1') { // 非0元号卡资费，跳转本地页面
-          shareUrl = this.buildInnerUrl(fee.id);
-        }
-        if (!isWechatBoolean) {
+      );
+      sendGetRequest(this, reqParams);
+    },
+    closeAds: function(e) {
+      this.prevDef(e);
+      console.log('closeAds');
+      this.isAdsShow = false;
+    },
+    goImgLink: function(e) {
+      this.prevDef(e);
+      if (!/^http/.test(this.advertisement.value)) {
+        return;
+      }
+      this.advertisement.value = this.advertisement.value.replace(/\/gpas/i, baseUrl);
+      let url = this.advertisement.value;
+      window.location.href = url;
+    },
+    categoryChange: function(categoryId) {
+      this.selectedCategory = categoryId;
+    },
+    countRecord: function() {
+      let phoneNumber = this.$route.query.p;
+      let shareUrl = `${window.location.origin + baseUrl}/common/new/redirect?to=emp/shareshop&p=${phoneNumber}&ptid=${this.partnerId}`;
+      console.log(shareUrl);
+      let obj = {
+        title: '为你推荐一款超值业务，点击可享更多流量和套餐优惠哟',
+        desc: '更多精彩超值业务，等你来办！',
+        link: shareUrl,
+        imgUrl: `${window.location.origin + baseUrl}/partner/static/img/employee/cmcc.png`
+      };
+      getJsApiConfig(obj);
+      if (getSession('shareshop_cnt')) return;
+      saveSession('shareshop_cnt', '1');
+      let url = `${baseUrl}/shareStatistics/statisticShare?phoneNumber=${phoneNumber}&type=2`; // type=1表示点击分享按钮，type=2表示进入分享页面
+      let reqParams = getRequestParams(url); // 统计不需要处理返回值
+      sendGetRequest(this, reqParams);
+    },
+    prevDef: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    },
+    round: function (val, n) {
+      var result = parseFloat(val);
+      if (!n && n !== 0) n = 2;
+      return Math.round(result * Math.pow(10, n)) / Math.pow(10, n);
+    },
+    roundKeep: function (val, n) {
+      var result = parseFloat(val);
+      if (!n && n !== 0) n = 2;
+      var resultStr = result.toString();
+      var dotPos = resultStr.indexOf('.');
+      if (dotPos < 0) {
+        dotPos = resultStr.length;
+        resultStr += '.';
+      }
+      while (resultStr.length <= (dotPos + n)) {
+        resultStr += '0';
+      }
+      return resultStr;
+    },
+    pInt: function (val) {
+      return parseInt(val, 10);
+    },
+    getList: function() {
+      let url = `${baseUrl}/packageSalary/listForShare?phone=${this.$route.query.p}`;
+      let reqParams = getRequestParams(
+        url,
+        '',
+        (vue, json) => {
+          vue.isLoading = false;
           Indicator.close();
-          console.log(fee);
-          let shareObj = {
-            shareTitle: fee.shareTitle,
-            shareDesc: fee.shareBrief,
-            shareLink: shareUrl,
-            sharePic: fee.icon
-          };
-          handleShare(this, shareObj);
-          return;
-        }
-        this.currentShareFee = {};
-        console.log(fee);
-        // let shareUrl = this.buildUrl(fee.publicUrl);
-        let obj = {
-          title: fee.shareTitle,
-          desc: fee.shareBrief,
-          link: shareUrl,
-          imgUrl: /^http/i.test(fee.icon) ? fee.icon : `${window.location.origin + baseUrl}/partner/static/img/cmcc_logo.png`
-        };
-        // wx.ready(function() {
-        showMenuItems();
-        // 监听“发送给好友”按钮点击、自定义分享内容及分享结果接口
-        wx.onMenuShareAppMessage(obj);
-        // 监听“分享到朋友圈”按钮点击、自定义分享内容及分享结果接口
-        wx.onMenuShareTimeline(obj);
-        // 监听“分享到QQ”按钮点击、自定义分享内容及分享结果接口
-        wx.onMenuShareQQ(obj);
-        // 监听“分享到微博”按钮点击、自定义分享内容及分享结果接口
-        wx.onMenuShareWeibo(obj);
-        // 监听“分享到QQ空间”按钮点击、自定义分享内容及分享结果接口
-        wx.onMenuShareQZone(obj);
-        // });
-        // wx.updateAppMessageShareData(obj);
-        // wx.updateTimelineShareData(obj);
-        this.showTipLayer(fee);
-      },
-      buildUrl: function (originUrl, shareType) {
-        if (/\?/.test(originUrl)) {
-          originUrl += `&userId=${this.$route.query.ptid}`;
-        } else {
-          originUrl += `?userId=${this.$route.query.ptid}`;
-        }
-        if (!/rs=/i.test(originUrl)) {
-          originUrl += `&rs=280105`;
-        }
-        let url = `${window.location.origin + baseUrl}/packageSalary/share?url=${encodeURIComponent(originUrl)}`;
-        if (shareType === 'qr') {
-          url = originUrl;
-        }
-        return url;
-      },
-      buildInnerUrl: function(feeId) {
-        return `${window.location.origin + baseUrl}/common/redirect?info=path=feedetaillistenid=${feeId}listenpartnerId=${this.partnerId}`;
-      },
-      showQrCode: function(e, fee, categoryId) {
-        e.stopPropagation();
-        Indicator.open();
-        this.currentShareFee = fee;
-        this.currentShareCategoryId = categoryId;
-        // Webtrends.multiTrack({ argsa: ['WT.nv', 'gpas_index_qrBtn', 'WT.event', 'gpas_btn_qr_' + fee.id] });
-        this.drawPoster();
-      },
-      closeQrcodeLayer: function() {
-        if (this.duringTime >= 600) {
-          return;
-        }
-        this.currentShareFee = {};
-        this.qrcodeShow = false;
-      },
-      showTipLayer: function (fee) {
-        this.tipShow = true;
-        // Indicator.open();
-        // this.drawPoster();
-      },
-      closeTipLayer: function () {
-        this.currentShareFee = {};
-        this.tipShow = false;
-      },
-      drawPoster: function () {
-        let opts = {
-          errorCorrectionLevel: 'Q',
-          type: 'image/png',
-          width: 1000,
-          rendererOpts: {
-            quality: 0.3
+          console.log(json);
+          if (json.status !== 0) {
+            Toast(json.msg || '没有可选的资费');
+            return;
           }
-        };
-        this.consoleLogs += '<p>____________</p><p>开始生成二维码</p>';
-        let shareUrl = this.buildUrl(this.currentShareFee.publicUrl, 'qr');
-        if ('' + this.currentShareCategoryId !== '1') { // 非0元号卡资费，跳转本地页面
-          shareUrl = this.buildInnerUrl(this.currentShareFee.id);
+          vue.ptUserInfo = {
+            'headimgurl': json.data.headImg,
+            'phone': json.data.phone
+          };
+          let newImg = new Image();
+          newImg.src = vue.ptUserInfo.headimgurl;
+          newImg.onload = () => {
+            vue.headPicture = vue.ptUserInfo.headimgurl;
+          };
+          newImg.onerror = () => {
+            console.info('图片加载失败');
+            vue.headPicture = 'static/img/cmcc_logo.png';
+          };
+          vue.list = vue.list.concat(json.data.categoryList);
+          if (vue.list.length > 0) {
+            vue.selectedCategory = vue.list[0].id;
+          }
+        },
+        (vue, ex) => {
+          vue.isLoading = false;
+          Toast('网络异常');
+          Indicator.close();
         }
-        console.log(shareUrl);
-        QRCode.toCanvas(shareUrl, opts).then(qrCanvas => {
-          var width = 120;
-          var height = 120;
-          var x = width * 3.3;
-          var y = height * 3.3;
-          var lw = width * 0.28;
-          var lh = height * 0.28;
-          var scaleNum = 2; // 画布扩大倍数
+      );
+      sendGetRequest(this, reqParams);
+    },
+    expand: function (e, index, fee) {
+      e.stopPropagation();
+      // Webtrends.multiTrack({ argsa: ['WT.nv', 'gpas_index_dataBtn', 'WT.event', 'gpas_btn_data_' + fee.id] });
+      var findIndex = this.expandArr.indexOf(index);
+      if (findIndex >= 0) {
+        this.expandArr.splice(findIndex, 1);
+      } else {
+        this.expandArr.push(index);
+      }
+    },
+    jump: function (url, feeId, categoryId) {
+      // Webtrends.multiTrack({ argsa: ['WT.nv', 'gpas_index_feeType', 'WT.event', 'gpas_feeId_' + feeId] });
+      if ('' + categoryId === '1') { // 0元号卡资费，跳转本地页面
+        let jumpUrl = this.buildUrl(url);
+        window.location.href = jumpUrl;
+      } else if ('' + categoryId === '2') { // 特惠流量，跳转本地页面
+        pageRouter(this, { path: '/handlesuperflow', query: { id: feeId, partnerId: this.$route.query.ptid } });
+      } else if ('' + categoryId === '5') { // 合家欢，跳转本地页面
+        pageRouter(this, { path: '/familyDetail', query: { id: feeId, partnerId: this.$route.query.ptid } });
+      } else {
+        pageRouter(this, { path: '/feedetail', query: { id: feeId, partnerId: this.$route.query.ptid } });
+      }
+    },
+    share: function (e, fee, categoryId) {
+      e.stopPropagation();
+      // Webtrends.multiTrack({ argsa: ['WT.nv', 'gpas_index_shareBtn', 'WT.event', 'gpas_btn_share_' + fee.id] });
+      let shareUrl = this.buildUrl(fee.publicUrl);
+      if ('' + categoryId !== '1') { // 非0元号卡资费，跳转本地页面
+        shareUrl = this.buildInnerUrl(fee.id);
+      }
+      if (!isWechatBoolean) {
+        Indicator.close();
+        console.log(fee);
+        let shareObj = {
+          shareTitle: fee.shareTitle,
+          shareDesc: fee.shareBrief,
+          shareLink: shareUrl,
+          sharePic: fee.icon
+        };
+        handleShare(this, shareObj);
+        return;
+      }
+      this.currentShareFee = {};
+      console.log(fee);
+      // let shareUrl = this.buildUrl(fee.publicUrl);
+      let obj = {
+        title: fee.shareTitle,
+        desc: fee.shareBrief,
+        link: shareUrl,
+        imgUrl: /^http/i.test(fee.icon) ? fee.icon : `${window.location.origin + baseUrl}/partner/static/img/cmcc_logo.png`
+      };
+        // wx.ready(function() {
+      showMenuItems();
+      // 监听“发送给好友”按钮点击、自定义分享内容及分享结果接口
+      wx.onMenuShareAppMessage(obj);
+      // 监听“分享到朋友圈”按钮点击、自定义分享内容及分享结果接口
+      wx.onMenuShareTimeline(obj);
+      // 监听“分享到QQ”按钮点击、自定义分享内容及分享结果接口
+      wx.onMenuShareQQ(obj);
+      // 监听“分享到微博”按钮点击、自定义分享内容及分享结果接口
+      wx.onMenuShareWeibo(obj);
+      // 监听“分享到QQ空间”按钮点击、自定义分享内容及分享结果接口
+      wx.onMenuShareQZone(obj);
+      // });
+      // wx.updateAppMessageShareData(obj);
+      // wx.updateTimelineShareData(obj);
+      this.showTipLayer(fee);
+    },
+    buildUrl: function (originUrl, shareType) {
+      if (/\?/.test(originUrl)) {
+        originUrl += `&userId=${this.$route.query.ptid}`;
+      } else {
+        originUrl += `?userId=${this.$route.query.ptid}`;
+      }
+      if (!/rs=/i.test(originUrl)) {
+        originUrl += `&rs=280105`;
+      }
+      let url = `${window.location.origin + baseUrl}/packageSalary/share?url=${encodeURIComponent(originUrl)}`;
+      if (shareType === 'qr') {
+        url = originUrl;
+      }
+      return url;
+    },
+    buildInnerUrl: function(feeId) {
+      return `${window.location.origin + baseUrl}/common/redirect?info=path=feedetaillistenid=${feeId}listenpartnerId=${this.partnerId}`;
+    },
+    showQrCode: function(e, fee, categoryId) {
+      e.stopPropagation();
+      Indicator.open();
+      this.currentShareFee = fee;
+      this.currentShareCategoryId = categoryId;
+      // Webtrends.multiTrack({ argsa: ['WT.nv', 'gpas_index_qrBtn', 'WT.event', 'gpas_btn_qr_' + fee.id] });
+      this.drawPoster();
+    },
+    closeQrcodeLayer: function() {
+      if (this.duringTime >= 600) {
+        return;
+      }
+      this.currentShareFee = {};
+      this.qrcodeShow = false;
+    },
+    showTipLayer: function (fee) {
+      this.tipShow = true;
+      // Indicator.open();
+      // this.drawPoster();
+    },
+    closeTipLayer: function () {
+      this.currentShareFee = {};
+      this.tipShow = false;
+    },
+    drawPoster: function () {
+      let opts = {
+        errorCorrectionLevel: 'Q',
+        type: 'image/png',
+        width: 1000,
+        rendererOpts: {
+          quality: 0.3
+        }
+      };
+      this.consoleLogs += '<p>____________</p><p>开始生成二维码</p>';
+      let shareUrl = this.buildUrl(this.currentShareFee.publicUrl, 'qr');
+      if ('' + this.currentShareCategoryId !== '1') { // 非0元号卡资费，跳转本地页面
+        shareUrl = this.buildInnerUrl(this.currentShareFee.id);
+      }
+      console.log(shareUrl);
+      QRCode.toCanvas(shareUrl, opts).then(qrCanvas => {
+        var width = 120;
+        var height = 120;
+        var x = width * 3.3;
+        var y = height * 3.3;
+        var lw = width * 0.28;
+        var lh = height * 0.28;
+        var scaleNum = 2; // 画布扩大倍数
 
-          var qrLogo = new Image();
-          // qrLogo.setAttribute('crossOrigin', 'Anonymous'); // 图片跨域
-          qrLogo.src = 'static/img/cmcc_logo.png'; // 设置二维码LOGO图片
-          qrLogo.onerror = () => {
-            this.consoleLogs += '<p>Logo加载失败</p>';
+        var qrLogo = new Image();
+        // qrLogo.setAttribute('crossOrigin', 'Anonymous'); // 图片跨域
+        qrLogo.src = 'static/img/cmcc_logo.png'; // 设置二维码LOGO图片
+        qrLogo.onerror = () => {
+          this.consoleLogs += '<p>Logo加载失败</p>';
+          Indicator.close();
+        };
+        this.consoleLogs += '<p>准备在二维码上画LOGO</p>';
+        qrLogo.onload = () => {
+          this.consoleLogs += '<p>开始在二维码上画LOGO</p>';
+          qrCanvas.getContext('2d').drawImage(qrLogo, x, y, lw * 6, lh * 6); // 在二维码上画LOGO
+
+          var posterCanvas = document.createElement('canvas');
+          posterCanvas.setAttribute('style', 'width: 420px; height: 550px;'); // 设置画布样式大小
+          posterCanvas.setAttribute('width', '' + (420 * scaleNum));
+          posterCanvas.setAttribute('height', '' + (550 * scaleNum)); // 设置画布实际大小
+          var ctx = posterCanvas.getContext('2d');
+          // ctx.fillStyle = '#FFFFFF';
+          // ctx.fillRect(0, 0, 420 * scaleNum, 550 * scaleNum); // 填充整个背景底色
+
+          var posterImg = new Image();
+          // posterImg.setAttribute('crossOrigin', 'Anonymous');
+          posterImg.src = 'static/img/index/poster.png';
+          posterImg.onerror = () => {
+            this.consoleLogs += '<p>海报图加载失败</p>';
             Indicator.close();
           };
-          this.consoleLogs += '<p>准备在二维码上画LOGO</p>';
-          qrLogo.onload = () => {
-            this.consoleLogs += '<p>开始在二维码上画LOGO</p>';
-            qrCanvas.getContext('2d').drawImage(qrLogo, x, y, lw * 6, lh * 6); // 在二维码上画LOGO
+          this.consoleLogs += '<p>准备画海报背景</p>';
+          posterImg.onload = () => { // 将海报图画到画布上
+            this.consoleLogs += '<p>开始画海报背景</p>';
+            ctx.drawImage(posterImg, 0, 0, 420 * scaleNum, 550 * scaleNum);
+            this.consoleLogs += '<p>画合伙人LOGO</p>';
+            ctx.drawImage(qrLogo, 45 * scaleNum, 30 * scaleNum, 60 * scaleNum, 60 * scaleNum); // 画合伙人LOGO
 
-            var posterCanvas = document.createElement('canvas');
-            posterCanvas.setAttribute('style', 'width: 420px; height: 550px;'); // 设置画布样式大小
-            posterCanvas.setAttribute('width', '' + (420 * scaleNum));
-            posterCanvas.setAttribute('height', '' + (550 * scaleNum)); // 设置画布实际大小
-            var ctx = posterCanvas.getContext('2d');
-            // ctx.fillStyle = '#FFFFFF';
-            // ctx.fillRect(0, 0, 420 * scaleNum, 550 * scaleNum); // 填充整个背景底色
-
-            var posterImg = new Image();
-            // posterImg.setAttribute('crossOrigin', 'Anonymous');
-            posterImg.src = 'static/img/index/poster.png';
-            posterImg.onerror = () => {
-              this.consoleLogs += '<p>海报图加载失败</p>';
+            var qrImg = new Image();
+            // qrImg.setAttribute('crossOrigin', 'Anonymous');
+            qrImg.src = qrCanvas.toDataURL('image/png');
+            qrImg.onerror = () => {
+              this.consoleLogs += '<p>二维码加载失败</p>';
               Indicator.close();
             };
-            this.consoleLogs += '<p>准备画海报背景</p>';
-            posterImg.onload = () => { // 将海报图画到画布上
-              this.consoleLogs += '<p>开始画海报背景</p>';
-              ctx.drawImage(posterImg, 0, 0, 420 * scaleNum, 550 * scaleNum);
-              this.consoleLogs += '<p>画合伙人LOGO</p>';
-              ctx.drawImage(qrLogo, 45 * scaleNum, 30 * scaleNum, 60 * scaleNum, 60 * scaleNum); // 画合伙人LOGO
+            this.consoleLogs += '<p>准备画二维码到海报上</p>';
+            qrImg.onload = () => { // 将带有LOGO的二维码画到画布上
+              this.consoleLogs += '<p>开始画二维码到海报上</p>';
+              ctx.drawImage(qrImg, 131.5 * scaleNum, 210 * scaleNum, 152 * scaleNum, 152 * scaleNum);
 
-              var qrImg = new Image();
-              // qrImg.setAttribute('crossOrigin', 'Anonymous');
-              qrImg.src = qrCanvas.toDataURL('image/png');
-              qrImg.onerror = () => {
-                this.consoleLogs += '<p>二维码加载失败</p>';
-                Indicator.close();
-              };
-              this.consoleLogs += '<p>准备画二维码到海报上</p>';
-              qrImg.onload = () => { // 将带有LOGO的二维码画到画布上
-                this.consoleLogs += '<p>开始画二维码到海报上</p>';
-                ctx.drawImage(qrImg, 131.5 * scaleNum, 210 * scaleNum, 152 * scaleNum, 152 * scaleNum);
+              // ---> 绘制合伙人昵称、合伙人电话、资费分享标题的文字
+              canvasTextAutoWrap(this.currentShareFee.packageName, ctx, 130 * scaleNum, 57 * scaleNum, 300 * scaleNum, 24 * scaleNum, 2, (20 * scaleNum) + 'px 黑体', '#000000');
+              // canvasTextAutoWrap(this.phone, ctx, 130 * scaleNum, 85 * scaleNum, 400 * scaleNum, 16 * scaleNum, 1, (16 * scaleNum) + 'px 黑体', '#777777');
+              canvasTextAutoWrap(this.currentShareFee.packageBrief, ctx, 115 * scaleNum, 139 * scaleNum, 300 * scaleNum, 24 * scaleNum, 2, (20 * scaleNum) + 'px 黑体', '#333333');
+              ctx.stroke();
 
-                // ---> 绘制合伙人昵称、合伙人电话、资费分享标题的文字
-                canvasTextAutoWrap(this.currentShareFee.packageName, ctx, 130 * scaleNum, 57 * scaleNum, 300 * scaleNum, 24 * scaleNum, 2, (20 * scaleNum) + 'px 黑体', '#000000');
-                // canvasTextAutoWrap(this.phone, ctx, 130 * scaleNum, 85 * scaleNum, 400 * scaleNum, 16 * scaleNum, 1, (16 * scaleNum) + 'px 黑体', '#777777');
-                canvasTextAutoWrap(this.currentShareFee.packageBrief, ctx, 115 * scaleNum, 139 * scaleNum, 300 * scaleNum, 24 * scaleNum, 2, (20 * scaleNum) + 'px 黑体', '#333333');
-                ctx.stroke();
-
-                posterCanvas.setAttribute('style', 'width: 210px; height: 275px;'); // 设置画布样式大小
-                this.posterSrc = posterCanvas.toDataURL('image/png');
-                // this.posterCanvas = posterCanvas;
-                Indicator.close();
-                this.qrcodeShow = true;
-              };
+              posterCanvas.setAttribute('style', 'width: 210px; height: 275px;'); // 设置画布样式大小
+              this.posterSrc = posterCanvas.toDataURL('image/png');
+              // this.posterCanvas = posterCanvas;
+              Indicator.close();
+              this.qrcodeShow = true;
             };
           };
-        }).catch(err => {
-          console.log(err);
-          this.consoleLogs += '<p>生成二维码失败' + err + '</p>';
-          Indicator.close();
-        });
-      },
-      touchStart: function(e) {
-        this.duringTime = 0;
-        this.startTime = new Date().getTime();
-      },
-      touchEnd: function(e) {
-        this.duringTime = new Date().getTime() - this.startTime;
-      }
+        };
+      }).catch(err => {
+        console.log(err);
+        this.consoleLogs += '<p>生成二维码失败' + err + '</p>';
+        Indicator.close();
+      });
+    },
+    touchStart: function(e) {
+      this.duringTime = 0;
+      this.startTime = new Date().getTime();
+    },
+    touchEnd: function(e) {
+      this.duringTime = new Date().getTime() - this.startTime;
     }
-  };
-  /*
+  }
+};
+/*
   * str: 要绘制的字符串
   * ctx: canvas对象的getContext('2d')实例
   * initX: 绘制字符串起始x坐标
@@ -487,42 +487,42 @@
   * font: 绘制字体参数
   * color: 绘制颜色参数
   */
-  function canvasTextAutoWrap (str, ctx, initX, initY, drawWidth, lineHeight, rowNum, font, color) {
-    ctx.fillStyle = color;
-    ctx.font = font;
-    var lineWidth = 0;
-    var lastSubStrIndex = 0;
-    var cntRow = 1;
-    var strWidth = 0;
-    for (var w = 0; w < str.length; w++) {
-      strWidth += ctx.measureText(str[w]).width;
-    }
-    // if (str === '30G定向流量;免费体验3个月') {
-    //   console.log(strWidth, drawWidth);
-    // }
-    if (strWidth <= (drawWidth - initX) && rowNum === 2) {
-      initY += Math.floor(lineHeight / 2);
-    }
-    for (var i = 0; i < str.length; i++) {
-      lineWidth += ctx.measureText(str[i]).width;
-      if (lineWidth > drawWidth - initX) { // 减去initX,防止边界出现的问题
-        cntRow += 1;
-        if (rowNum && cntRow > rowNum) { // 如果传入最大行数rowNum，则在限制的行数最末端加上...
-          ctx.fillText(str.substring(lastSubStrIndex, i - 2) + '...', initX, initY);
-          break;
-        }
-        ctx.fillText(str.substring(lastSubStrIndex, i), initX, initY);
-        initY += lineHeight;
-        lineWidth = 0;
-        lastSubStrIndex = i;
+function canvasTextAutoWrap (str, ctx, initX, initY, drawWidth, lineHeight, rowNum, font, color) {
+  ctx.fillStyle = color;
+  ctx.font = font;
+  var lineWidth = 0;
+  var lastSubStrIndex = 0;
+  var cntRow = 1;
+  var strWidth = 0;
+  for (var w = 0; w < str.length; w++) {
+    strWidth += ctx.measureText(str[w]).width;
+  }
+  // if (str === '30G定向流量;免费体验3个月') {
+  //   console.log(strWidth, drawWidth);
+  // }
+  if (strWidth <= (drawWidth - initX) && rowNum === 2) {
+    initY += Math.floor(lineHeight / 2);
+  }
+  for (var i = 0; i < str.length; i++) {
+    lineWidth += ctx.measureText(str[i]).width;
+    if (lineWidth > drawWidth - initX) { // 减去initX,防止边界出现的问题
+      cntRow += 1;
+      if (rowNum && cntRow > rowNum) { // 如果传入最大行数rowNum，则在限制的行数最末端加上...
+        ctx.fillText(str.substring(lastSubStrIndex, i - 2) + '...', initX, initY);
+        break;
       }
-      if (i === str.length - 1) {
-        ctx.fillText(str.substring(lastSubStrIndex, i + 1), initX, initY);
-      }
+      ctx.fillText(str.substring(lastSubStrIndex, i), initX, initY);
+      initY += lineHeight;
+      lineWidth = 0;
+      lastSubStrIndex = i;
+    }
+    if (i === str.length - 1) {
+      ctx.fillText(str.substring(lastSubStrIndex, i + 1), initX, initY);
     }
   }
+}
 </script>
-<style>
+<style lang="less">
 body {
   background: #e8e8e8;
 }

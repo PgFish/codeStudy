@@ -120,11 +120,11 @@ export default {
   methods: {
     getSms: function() {
       if (!this.utils.Constants.cmccMobileReg.test(this.phone)) {
-        Toast({message: '请输入正确的移动手机号码！', duration: 1200});
+        Toast({ message: '请输入正确的移动手机号码！', duration: 1200 });
         return;
       }
       if (this.isSending) {
-        Toast({message: `请等待${this.smsTip}`, duration: 1200});
+        Toast({ message: `请等待${this.smsTip}`, duration: 1200 });
         return;
       }
       let url = `${this.utils.baseUrl}/verifyCode/send`; // 获取短信验证码

@@ -146,11 +146,11 @@ export default {
     },
     getSms: function() {
       if (this.isSmsSending) {
-        Toast({message: '请等待' + this.smsTip, position: 'bottom'});
+        Toast({ message: '请等待' + this.smsTip, position: 'bottom' });
         return;
       }
       if (!Constants.cmccMobileReg.test(this.phone)) {
-        Toast({message: '请输入正确的移动手机号', position: 'bottom'});
+        Toast({ message: '请输入正确的移动手机号', position: 'bottom' });
         return;
       }
       let url = Constants.dzgApiV2Host + '/sms/send?phoneNumber=' + this.phone + '&smsType=9&empCode=ob0086';
@@ -163,16 +163,16 @@ export default {
           if (json && json.ResultCode === 1000) {
             vue.isSmsSending = true;
             vue.sms = '';
-            Toast({message: '短信验证码发送成功', position: 'bottom'});
+            Toast({ message: '短信验证码发送成功', position: 'bottom' });
           } else {
-            Toast({message: '短信验证码发送失败', position: 'bottom'});
+            Toast({ message: '短信验证码发送失败', position: 'bottom' });
           }
         },
         (vue, ex) => {
           console.log('短信验证码发送失败', ex);
           //   vue.Bus.loading.hide();
           Indicator.close();
-          Toast({message: '短信验证码发送失败', position: 'bottom'});
+          Toast({ message: '短信验证码发送失败', position: 'bottom' });
         }
       );
       Indicator.open();
@@ -180,11 +180,11 @@ export default {
     },
     getPromiseFee: function() { // 承诺消费查询
       if (!Constants.cmccMobileReg.test(this.phone)) {
-        Toast({message: '请输入正确的移动手机号', position: 'bottom'});
+        Toast({ message: '请输入正确的移动手机号', position: 'bottom' });
         return;
       }
       if (!/\d{6}/.test(this.sms)) {
-        Toast({message: '请输入6位数字验证码', position: 'bottom'});
+        Toast({ message: '请输入6位数字验证码', position: 'bottom' });
         return;
       }
       let url = `${Constants.dzgApiV2Host}/h5/data/SMMCCalculateARPU`;
@@ -299,11 +299,11 @@ export default {
             }
           } else {
             vue.canStock = true;
-            Toast({message: '配置异常，请联系管理员', position: 'bottom'});
+            Toast({ message: '配置异常，请联系管理员', position: 'bottom' });
           }
         },
         (vue, ex) => {
-          Toast({message: '网络错误，请稍候再试', position: 'bottom'});
+          Toast({ message: '网络错误，请稍候再试', position: 'bottom' });
         }
       );
       sendGetRequest(this, reqParams);
@@ -359,11 +359,11 @@ export default {
       let feeAmt = this.promiseInfo.arpu_value;
       console.log(feeAmt);
       if (!feeAmt) {
-        Toast({message: '未获取到承诺消费金额', position: 'bottom'});
+        Toast({ message: '未获取到承诺消费金额', position: 'bottom' });
         return;
       }
       if (this.feeIndex === '') {
-        Toast({message: '承诺金额未达到最低值18', position: 'bottom'});
+        Toast({ message: '承诺金额未达到最低值18', position: 'bottom' });
         return;
       }
       Indicator.open()
@@ -388,7 +388,7 @@ export default {
   }
 };
 </script>
-<style>
+<style lang="less">
   .promise-fee {
     width: 100%;
     min-width: 270px;

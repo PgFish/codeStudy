@@ -312,7 +312,7 @@ export default {
   }
 };
 </script>
-<style>
+<style lang="less">
   .check-in {
     position: relative;
     min-height: 100%;

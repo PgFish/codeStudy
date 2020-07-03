@@ -13,7 +13,7 @@ const getters = {
 };
 
 const actions = {
-  [types.BASE_DZGMODULES_ACTION] ({commit, state}, vue) {
+  [types.BASE_DZGMODULES_ACTION] ({ commit, state }, vue) {
     commit(types.BASE_DZGMODULES_REQUEST);
     let url = Constants.apiV2Host + '/CmccBussServer/Dzg/QueryDzgModules';
     let params = {

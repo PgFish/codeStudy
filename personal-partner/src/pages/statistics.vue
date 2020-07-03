@@ -268,7 +268,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="less">
 .statics {
   padding-bottom: 60px;
   height: 100%;
@@ -315,7 +315,7 @@ export default {
         position: absolute;
         top: 0;
         left: 90px;
-        padding: 8px 0 0; 
+        padding: 8px 0 0;
         line-height: 1.5;
         overflow: hidden;
         white-space: nowrap;

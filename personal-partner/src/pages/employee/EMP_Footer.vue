@@ -11,166 +11,166 @@
 </template>
 
 <script>
-  import { hideMenuItems, pageRouter, getStorage, saveStorage, sourceType, isWechat, getSession } from 'src/assets/utils';
-  import Bus from 'src/assets/bus/bus';
+import { hideMenuItems, pageRouter, getStorage, saveStorage, sourceType, isWechat, getSession } from 'src/assets/utils';
+import Bus from 'src/assets/bus/bus';
 
-  export default {
-    props: {
-      showFooterCover: {
-        type: Boolean,
-        default: false
-      }
-    },
-    data() {
-      return {
-        selectedTab: 'shop',
-        isNoFooter: true,
-        phoneNumber: this.$route.query.p,
-        footerList: {
-          shop: {
-            icon: 'static/img/common/DP.png',
-            path: '/emp/index'
-          },
-          order: {
-            icon: 'static/img/common/DD.png',
-            path: '/emp/orderList'
-          }
+export default {
+  props: {
+    showFooterCover: {
+      type: Boolean,
+      default: false
+    }
+  },
+  data() {
+    return {
+      selectedTab: 'shop',
+      isNoFooter: true,
+      phoneNumber: this.$route.query.p,
+      footerList: {
+        shop: {
+          icon: 'static/img/common/DP.png',
+          path: '/emp/index'
         },
-        pathMapping: {
-          '/emp/index': 'shop',
-          '/rule': 'shop',
-          '/introduce': 'shop',
-          '/emp/orderList': 'order',
-          '/logistics': 'order',
-          '/tradeDetail': 'trade'
-        },
-        isZW: false,
-        roleType: 3
-      };
-    },
-    components: {
-    },
-    watch: {
-      '$route'(to, from) {
-        hideMenuItems();
-        this.tabSelected();
-      }
-    },
-    created() {
-      this.isNoFooter = !this.$route.query.p;
-      let srcInfo = getSession('ptSourceInfo', true);
-      if (srcInfo) {
-        this.userInfo = srcInfo.userInfo;
-        if (sourceType === 'zhuangwei' || (sourceType === 'dzg' && !isWechat() && this.userInfo.realName)) {
-          this.isZW = true;
+        order: {
+          icon: 'static/img/common/DD.png',
+          path: '/emp/orderList'
         }
-      }
-      let serverUserInfo = getSession('ptDetailInfo', true); // 获取服务器返回的用户信息
-      if (serverUserInfo) {
-        this.roleType = serverUserInfo.roleType;
-      }
-      if (this.roleType === 3) {
-        delete this.footerList.trade;
-        this.footerList.statistics = {
-          icon: 'static/img/common/TJ.png',
-          path: '/statistics'
-        };
-      } else {
-        this.footerList.trade = {
-          icon: 'static/img/common/SY.png',
-          path: '/tradeDetail'
-        };
-      }
-      wx.ready(() => {
-        hideMenuItems();
-      });
+      },
+      pathMapping: {
+        '/emp/index': 'shop',
+        '/rule': 'shop',
+        '/introduce': 'shop',
+        '/emp/orderList': 'order',
+        '/logistics': 'order',
+        '/tradeDetail': 'trade'
+      },
+      isZW: false,
+      roleType: 3
+    };
+  },
+  components: {
+  },
+  watch: {
+    '$route'(to, from) {
+      hideMenuItems();
       this.tabSelected();
-      /*
-       *  声明事件，控制红点显示/隐藏
-       */
-      Bus.$on('on-footer-tab-select', obj => {
-        if (obj.preFn) {
-          obj.preFn();
-        }
-        setTimeout(() => {
-          this.footerList[obj.tabName].redDot = obj.isShow();
-        }, 10);
-      });
-    },
-    methods: {
-      prevDef: function (e) {
-        e.stopPropagation();
-        e.preventDefault();
-      },
-      tabSelected: function() {
-        let selectedTab = this.pathMapping[this.$route.path];
-        if (!selectedTab) {
-          return;
-        }
-        this.footerList = {
-          shop: {
-            icon: 'static/img/common/DP.png',
-            path: '/emp/index',
-            // redDot: (!this.isZW && getStorage('pt_shop_introduce_red_dot_' + this.$route.query.p, true)) || getStorage('pt_shop_rule_red_dot_' + this.$route.query.p, true) || !getStorage('pt_shop_act_red_dot_clicked_' + this.$route.query.p, true)
-            redDot: (!this.isZW && getStorage('pt_shop_introduce_red_dot_' + this.$route.query.p, true)) || getStorage('pt_shop_rule_red_dot_' + this.$route.query.p, true)
-          },
-          order: {
-            icon: 'static/img/common/DD.png',
-            path: '/emp/orderList',
-            redDot: getStorage('pt_order_0_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_1_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_2_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_3_red_dot_' + this.$route.query.p, true)
-          }
-        };
-        // if (this.roleType === 3) {
-        //   this.footerList.statistics = {
-        //     icon: 'static/img/common/TJ.png',
-        //     path: '/statistics'
-        //   };
-        // } else {
-        //   this.footerList.trade = {
-        //     icon: 'static/img/common/SY.png',
-        //     path: '/tradeDetail',
-        //     redDot: getStorage('pt_trade_red_dot_' + this.$route.query.p, true)
-        //   };
-        // }
-        if (this.footerList[selectedTab]) {
-          let iconPath = this.footerList[selectedTab].icon.replace('.png', '');
-          this.footerList[selectedTab].icon = iconPath + '_selected.png';
-        }
-      },
-      gotoPage: function(path, key) {
-        // console.log(key);
-        if (key === 'shop') { // 首页
-          Bus.$emit('on-footer-tab-select', {
-            tabName: key,
-            isShow: () => {
-              // return (!this.isZW && getStorage('pt_shop_introduce_red_dot_' + this.$route.query.p, true)) || getStorage('pt_shop_rule_red_dot_' + this.$route.query.p, true) || !getStorage('pt_shop_act_red_dot_clicked_' + this.$route.query.p, true);
-              return (!this.isZW && getStorage('pt_shop_introduce_red_dot_' + this.$route.query.p, true)) || getStorage('pt_shop_rule_red_dot_' + this.$route.query.p, true);
-            }
-          });
-        } else if (key === 'order') { // 订单页
-          Bus.$emit('on-footer-tab-select', {
-            tabName: key,
-            isShow: () => {
-              return getStorage('pt_order_0_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_1_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_2_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_3_red_dot_' + this.$route.query.p, true);
-            }
-          });
-        } else if (key === 'trade') { // 收益页
-          Bus.$emit('on-footer-tab-select', {
-            tabName: key,
-            isShow: () => {
-              return getStorage('pt_trade_red_dot_' + this.$route.query.p, true);
-            },
-            preFn: () => {
-              saveStorage('pt_trade_red_dot_' + this.$route.query.p, false);
-            }
-          });
-        }
-        pageRouter(this, {path: path, query: {p: this.$route.query.p, ptid: this.$route.query.ptid}});
+    }
+  },
+  created() {
+    this.isNoFooter = !this.$route.query.p;
+    let srcInfo = getSession('ptSourceInfo', true);
+    if (srcInfo) {
+      this.userInfo = srcInfo.userInfo;
+      if (sourceType === 'zhuangwei' || (sourceType === 'dzg' && !isWechat() && this.userInfo.realName)) {
+        this.isZW = true;
       }
     }
-  };
+    let serverUserInfo = getSession('ptDetailInfo', true); // 获取服务器返回的用户信息
+    if (serverUserInfo) {
+      this.roleType = serverUserInfo.roleType;
+    }
+    if (this.roleType === 3) {
+      delete this.footerList.trade;
+      this.footerList.statistics = {
+        icon: 'static/img/common/TJ.png',
+        path: '/statistics'
+      };
+    } else {
+      this.footerList.trade = {
+        icon: 'static/img/common/SY.png',
+        path: '/tradeDetail'
+      };
+    }
+    wx.ready(() => {
+      hideMenuItems();
+    });
+    this.tabSelected();
+    /*
+       *  声明事件，控制红点显示/隐藏
+       */
+    Bus.$on('on-footer-tab-select', obj => {
+      if (obj.preFn) {
+        obj.preFn();
+      }
+      setTimeout(() => {
+        this.footerList[obj.tabName].redDot = obj.isShow();
+      }, 10);
+    });
+  },
+  methods: {
+    prevDef: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    },
+    tabSelected: function() {
+      let selectedTab = this.pathMapping[this.$route.path];
+      if (!selectedTab) {
+        return;
+      }
+      this.footerList = {
+        shop: {
+          icon: 'static/img/common/DP.png',
+          path: '/emp/index',
+          // redDot: (!this.isZW && getStorage('pt_shop_introduce_red_dot_' + this.$route.query.p, true)) || getStorage('pt_shop_rule_red_dot_' + this.$route.query.p, true) || !getStorage('pt_shop_act_red_dot_clicked_' + this.$route.query.p, true)
+          redDot: (!this.isZW && getStorage('pt_shop_introduce_red_dot_' + this.$route.query.p, true)) || getStorage('pt_shop_rule_red_dot_' + this.$route.query.p, true)
+        },
+        order: {
+          icon: 'static/img/common/DD.png',
+          path: '/emp/orderList',
+          redDot: getStorage('pt_order_0_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_1_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_2_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_3_red_dot_' + this.$route.query.p, true)
+        }
+      };
+      // if (this.roleType === 3) {
+      //   this.footerList.statistics = {
+      //     icon: 'static/img/common/TJ.png',
+      //     path: '/statistics'
+      //   };
+      // } else {
+      //   this.footerList.trade = {
+      //     icon: 'static/img/common/SY.png',
+      //     path: '/tradeDetail',
+      //     redDot: getStorage('pt_trade_red_dot_' + this.$route.query.p, true)
+      //   };
+      // }
+      if (this.footerList[selectedTab]) {
+        let iconPath = this.footerList[selectedTab].icon.replace('.png', '');
+        this.footerList[selectedTab].icon = iconPath + '_selected.png';
+      }
+    },
+    gotoPage: function(path, key) {
+      // console.log(key);
+      if (key === 'shop') { // 首页
+        Bus.$emit('on-footer-tab-select', {
+          tabName: key,
+          isShow: () => {
+            // return (!this.isZW && getStorage('pt_shop_introduce_red_dot_' + this.$route.query.p, true)) || getStorage('pt_shop_rule_red_dot_' + this.$route.query.p, true) || !getStorage('pt_shop_act_red_dot_clicked_' + this.$route.query.p, true);
+            return (!this.isZW && getStorage('pt_shop_introduce_red_dot_' + this.$route.query.p, true)) || getStorage('pt_shop_rule_red_dot_' + this.$route.query.p, true);
+          }
+        });
+      } else if (key === 'order') { // 订单页
+        Bus.$emit('on-footer-tab-select', {
+          tabName: key,
+          isShow: () => {
+            return getStorage('pt_order_0_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_1_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_2_red_dot_' + this.$route.query.p, true) || getStorage('pt_order_3_red_dot_' + this.$route.query.p, true);
+          }
+        });
+      } else if (key === 'trade') { // 收益页
+        Bus.$emit('on-footer-tab-select', {
+          tabName: key,
+          isShow: () => {
+            return getStorage('pt_trade_red_dot_' + this.$route.query.p, true);
+          },
+          preFn: () => {
+            saveStorage('pt_trade_red_dot_' + this.$route.query.p, false);
+          }
+        });
+      }
+      pageRouter(this, { path: path, query: { p: this.$route.query.p, ptid: this.$route.query.ptid } });
+    }
+  }
+};
 </script>
-<style>
+<style lang="less">
   .footer {
     height: 50px;
     width: 100%;
@@ -204,7 +204,7 @@
     .flex-row {
       display: -webkit-box;
       display: -webkit-flex;
-      display: box;
+      ;
       display: flex;
       display: -ms-flex;
     }

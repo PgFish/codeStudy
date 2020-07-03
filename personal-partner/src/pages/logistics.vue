@@ -80,39 +80,39 @@
 </template>
 
 <script>
-  import { getSession } from 'src/assets/utils.js';
-  import { Indicator, MessageBox, Toast } from 'mint-ui';
-  export default {
-    components: {
-      Indicator,
-      MessageBox,
-      Toast
-    },
-    data() {
-      return {
-        userInfo: {},
-        orderInfo: {}
-      };
-    },
-    watch: {
-    },
-    created() {
-      Indicator.close();
-      document.title = '订单详情';
-      let srcInfo = getSession('ptSourceInfo', true);
-      console.log(srcInfo);
-      this.userInfo = srcInfo.userInfo0;
-      if (getSession('orderInfo')) {
-        this.orderInfo = getSession('orderInfo');
-        console.log('orderinfo:', this.orderInfo);
-      }
-    },
-    methods: {
+import { getSession } from 'src/assets/utils.js';
+import { Indicator, MessageBox, Toast } from 'mint-ui';
+export default {
+  components: {
+    Indicator,
+    MessageBox,
+    Toast
+  },
+  data() {
+    return {
+      userInfo: {},
+      orderInfo: {}
+    };
+  },
+  watch: {
+  },
+  created() {
+    Indicator.close();
+    document.title = '订单详情';
+    let srcInfo = getSession('ptSourceInfo', true);
+    console.log(srcInfo);
+    this.userInfo = srcInfo.userInfo0;
+    if (getSession('orderInfo')) {
+      this.orderInfo = getSession('orderInfo');
+      console.log('orderinfo:', this.orderInfo);
     }
-  };
+  },
+  methods: {
+  }
+};
 </script>
 
-<style>
+<style lang="less">
   body {
     background: #F0F0F0;
   }

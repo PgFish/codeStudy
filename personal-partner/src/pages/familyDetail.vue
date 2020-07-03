@@ -255,11 +255,11 @@ export default {
     },
     getSms: function() {
       if (!Constants.cmccMobileReg.test(this.phone)) {
-        Toast({message: '请输入正确的移动手机号码！', duration: 1200});
+        Toast({ message: '请输入正确的移动手机号码！', duration: 1200 });
         return;
       }
       if (this.isSending) {
-        Toast({message: `请等待${this.smsTip}`, duration: 1200});
+        Toast({ message: `请等待${this.smsTip}`, duration: 1200 });
         return;
       }
       let url = `${baseUrl}/verifyCode/send`; // 获取短信验证码
@@ -283,11 +283,11 @@ export default {
     },
     getMemberSms: function() {
       if (!Constants.cmccMobileReg.test(this.memberPhone)) {
-        Toast({message: '请输入正确的移动手机号码！', duration: 1200});
+        Toast({ message: '请输入正确的移动手机号码！', duration: 1200 });
         return;
       }
       if (this.isMemberSending) {
-        Toast({message: `请等待${this.memberSmsTip}`, duration: 1200});
+        Toast({ message: `请等待${this.memberSmsTip}`, duration: 1200 });
         return;
       }
       let url = `${baseUrl}/verifyCode/send`; // 获取短信验证码
@@ -311,11 +311,11 @@ export default {
     },
     submit: function() {
       if (!Constants.cmccMobileReg.test(this.phone)) {
-        Toast({message: '请输入正确的移动手机号码！', duration: 1200});
+        Toast({ message: '请输入正确的移动手机号码！', duration: 1200 });
         return;
       }
       if (!/\d{6}/.test(this.sms)) {
-        Toast({message: '请输入正确的验证码！', duration: 1200});
+        Toast({ message: '请输入正确的验证码！', duration: 1200 });
         return;
       }
       MessageBox.confirm('您正在办理合家欢，6元/月最多可添加9名成员，畅享成员间省内通话免费，确定办理吗？').then(action => {
@@ -343,9 +343,9 @@ export default {
         if (json && ('' + json.status === '0')) {
           saveSession('familyValidateSuccess', true);
           if (json.data.status !== 0) {
-            pageRouter(vue, {path: '/familyMember', query: {'type': 'search', selfPhone: vue.phone, mainPhone: json.data.mainPhone, id: this.$route.query.id, partnerId: this.partnerId}});
+            pageRouter(vue, { path: '/familyMember', query: { 'type': 'search', selfPhone: vue.phone, mainPhone: json.data.mainPhone, id: this.$route.query.id, partnerId: this.partnerId } });
           } else {
-            pageRouter(vue, {path: '/familyMember', query: {'type': 'new', selfPhone: vue.phone, mainPhone: json.data.mainPhone, id: this.$route.query.id, partnerId: this.partnerId}});
+            pageRouter(vue, { path: '/familyMember', query: { 'type': 'new', selfPhone: vue.phone, mainPhone: json.data.mainPhone, id: this.$route.query.id, partnerId: this.partnerId } });
           }
         } else {
           Toast(json.msg);
@@ -359,11 +359,11 @@ export default {
     },
     login: function() {
       if (!Constants.cmccMobileReg.test(this.memberPhone)) {
-        Toast({message: '请输入正确的移动手机号码！', duration: 1200});
+        Toast({ message: '请输入正确的移动手机号码！', duration: 1200 });
         return;
       }
       if (!/\d{6}/.test(this.memberSms)) {
-        Toast({message: '请输入正确的验证码！', duration: 1200});
+        Toast({ message: '请输入正确的验证码！', duration: 1200 });
         return;
       }
       this.getMemberList();
@@ -382,7 +382,7 @@ export default {
         console.log(json);
         if (json && ('' + json.status === '0')) {
           saveSession('familyValidateSuccess', true);
-          pageRouter(vue, {path: '/familyMember', query: {'type': 'search', selfPhone: vue.memberPhone, mainPhone: json.data.mainPhone, id: this.$route.query.id, partnerId: this.partnerId}});
+          pageRouter(vue, { path: '/familyMember', query: { 'type': 'search', selfPhone: vue.memberPhone, mainPhone: json.data.mainPhone, id: this.$route.query.id, partnerId: this.partnerId } });
         } else {
           Toast(json.msg);
         }
@@ -397,7 +397,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="less">
 body {
   background: #f0f0f0;
 }

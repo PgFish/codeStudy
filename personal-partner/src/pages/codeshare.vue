@@ -36,185 +36,185 @@
   </div>
 </template>
 <script>
-  import { baseUrl, isWechat, handleShare, getJsApiConfig } from 'src/assets/utils.js';
-  import { Indicator, MessageBox, Toast } from 'mint-ui';
-  import Clipboard from 'clipboard';
-  import QRCode from 'qrcode';
-  export default {
-    components: {
-      Indicator,
-      MessageBox,
-      Toast
-    },
-    data() {
-      return {
-        title: '邀请码',
-        codeType: '',
-        codeTypeMap: {
-          '1': '行客邀请码',
-          '2': '校客邀请码',
-          '3': '商客邀请码'
-        },
-        inviteCode: '',
-        qrcodeSrc: '',
-        tipShow: false,
-        isFullScreen: false,
-        fullScreenSrc: ''
-      };
-    },
-    watch: {
-    },
-    created() {
-      Indicator.close();
-      this.title = this.codeTypeMap[this.$route.query.ct] || '邀请码';
-      document.title = this.title;
-      console.log(this.$route.query.ct, this.$route.query.c);
-      this.codeType = this.$route.query.ct;
-      this.inviteCode = this.$route.query.c;
-      let url = this.buildUrl(this.codeType, this.inviteCode, 'public');
-      let obj = {
-        title: '政企合伙人',
-        timelineTitle: '政企合伙人-' + this.title + '：' + this.inviteCode,
-        desc: this.title + '：' + this.inviteCode,
-        link: url,
-        imgUrl: `${window.location.origin + baseUrl}/partner/static/img/cmcc_logo.png`,
-        hideList: [
-          // 'menuItem:share:qq',
-          // 'menuItem:share:weiboApp',
-          // 'menuItem:share:appMessage',
-          // 'menuItem:share:timeline',
-          // 'menuItem:favorite',
-          // 'menuItem:share:facebook',
-          // 'menuItem:share:QZone',
-          'menuItem:copyUrl'
-          // 'menuItem:openWithSafari',
-          // 'menuItem:openWithQQBrowser',
-          // 'menuItem:share:email'
-        ],
-        success: () => {
-        },
-        cancel: () => {
-        }
-      };
-      getJsApiConfig(obj);
-      this.drawQrCode();
-    },
-    mounted() {
-      this.clip = new Clipboard('#inviteCodeCopy', {
-        text: () => {
-          return this.inviteCode;
-        }
-      });
-      this.clip.on('success', (ev) => { // 复制到剪切板成功
-        // console.log('成功', ev);
-        Toast({
-          message: '复制到剪切板成功！'
-        });
-      });
-      this.clip.on('error', (ev) => { // 复制到剪切板失败
-        // console.log('失败', ev);
-        Toast({
-          message: '复制到剪切板失败！请手动复制'
-        });
-      });
-    },
-    methods: {
-      prevDef: function (e) {
-        e.stopPropagation();
-        e.preventDefault();
+import { baseUrl, isWechat, handleShare, getJsApiConfig } from 'src/assets/utils.js';
+import { Indicator, MessageBox, Toast } from 'mint-ui';
+import Clipboard from 'clipboard';
+import QRCode from 'qrcode';
+export default {
+  components: {
+    Indicator,
+    MessageBox,
+    Toast
+  },
+  data() {
+    return {
+      title: '邀请码',
+      codeType: '',
+      codeTypeMap: {
+        '1': '行客邀请码',
+        '2': '校客邀请码',
+        '3': '商客邀请码'
       },
-      share: function(codeType, code) {
-        let url = this.buildUrl(codeType, code);
-        console.log(url);
-        if (!isWechat()) {
-          Indicator.close();
-          let shareObj = {
-            shareTitle: '政企合伙人',
-            shareDesc: this.title + '：' + this.inviteCode,
-            shareLink: url,
-            sharePic: ''
-          };
-          handleShare(this, shareObj);
-          return;
-        }
-        this.tipShow = true;
+      inviteCode: '',
+      qrcodeSrc: '',
+      tipShow: false,
+      isFullScreen: false,
+      fullScreenSrc: ''
+    };
+  },
+  watch: {
+  },
+  created() {
+    Indicator.close();
+    this.title = this.codeTypeMap[this.$route.query.ct] || '邀请码';
+    document.title = this.title;
+    console.log(this.$route.query.ct, this.$route.query.c);
+    this.codeType = this.$route.query.ct;
+    this.inviteCode = this.$route.query.c;
+    let url = this.buildUrl(this.codeType, this.inviteCode, 'public');
+    let obj = {
+      title: '政企合伙人',
+      timelineTitle: '政企合伙人-' + this.title + '：' + this.inviteCode,
+      desc: this.title + '：' + this.inviteCode,
+      link: url,
+      imgUrl: `${window.location.origin + baseUrl}/partner/static/img/cmcc_logo.png`,
+      hideList: [
+        // 'menuItem:share:qq',
+        // 'menuItem:share:weiboApp',
+        // 'menuItem:share:appMessage',
+        // 'menuItem:share:timeline',
+        // 'menuItem:favorite',
+        // 'menuItem:share:facebook',
+        // 'menuItem:share:QZone',
+        'menuItem:copyUrl'
+        // 'menuItem:openWithSafari',
+        // 'menuItem:openWithQQBrowser',
+        // 'menuItem:share:email'
+      ],
+      success: () => {
       },
-      buildUrl: function(codeType, code, urlType) {
-        let url = `${window.location.origin + baseUrl}/partner/#/codeshare?ct=${codeType}&c=${code}`;
-        if (process.env.NODE_ENV === 'development') {
-          url = `${window.location.origin}/#/codeshare?ct=${codeType}&c=${code}`;
-        }
-        if (urlType === 'public') {
-          url = `${window.location.origin + baseUrl}/packageSalary/share?url=${encodeURIComponent(url)}`;
-        }
-        return url;
-      },
-      buildQRUrl: function(inviteCode) {
-        let url = `${window.location.origin + baseUrl}/register/wx/oAuth/userInfo?info=inviteCode=${inviteCode}`;
-        return url;
-      },
-      drawQrCode: function() {
-        let url = this.buildQRUrl(this.inviteCode);
-        let opts = {
-          errorCorrectionLevel: 'Q',
-          type: 'image/png',
-          width: 1000,
-          rendererOpts: {
-            quality: 0.3
-          },
-          margin: 0
-        };
-        this.consoleLogs += '<p>____________</p><p>开始生成二维码</p>';
-        QRCode.toCanvas(url, opts).then(qrCanvas => {
-          var width = 120;
-          var height = 120;
-          var x = width * 3.3;
-          var y = height * 3.3;
-          var lw = width * 0.28;
-          var lh = height * 0.28;
-
-          var qrLogo = new Image();
-          // qrLogo.setAttribute('crossOrigin', 'Anonymous'); // 图片跨域
-          qrLogo.src = 'static/img/cmcc_logo.png'; // 设置二维码LOGO图片
-          qrLogo.onerror = () => {
-            this.consoleLogs += '<p>Logo加载失败</p>';
-            Indicator.close();
-          };
-          this.consoleLogs += '<p>准备在二维码上画LOGO</p>';
-          qrLogo.onload = () => {
-            this.consoleLogs += '<p>开始在二维码上画LOGO</p>';
-            qrCanvas.getContext('2d').drawImage(qrLogo, x, y, lw * 6, lh * 6); // 在二维码上画LOGO
-            this.qrcodeSrc = qrCanvas.toDataURL('image/png');
-          };
-        });
-      },
-      closeTipLayer: function() {
-        this.tipShow = false;
-      },
-      fullScreen: function(clickedSrc) {
-        if (this.duringTime >= 600) {
-          return;
-        }
-        this.fullScreenSrc = clickedSrc;
-        this.isFullScreen = true;
-      },
-      closeFullScreen: function() {
-        if (this.duringTime >= 600) {
-          return;
-        }
-        this.isFullScreen = false;
-      },
-      touchStart: function(e) {
-        this.duringTime = 0;
-        this.startTime = new Date().getTime();
-      },
-      touchEnd: function(e) {
-        this.duringTime = new Date().getTime() - this.startTime;
+      cancel: () => {
       }
+    };
+    getJsApiConfig(obj);
+    this.drawQrCode();
+  },
+  mounted() {
+    this.clip = new Clipboard('#inviteCodeCopy', {
+      text: () => {
+        return this.inviteCode;
+      }
+    });
+    this.clip.on('success', (ev) => { // 复制到剪切板成功
+      // console.log('成功', ev);
+      Toast({
+        message: '复制到剪切板成功！'
+      });
+    });
+    this.clip.on('error', (ev) => { // 复制到剪切板失败
+      // console.log('失败', ev);
+      Toast({
+        message: '复制到剪切板失败！请手动复制'
+      });
+    });
+  },
+  methods: {
+    prevDef: function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    },
+    share: function(codeType, code) {
+      let url = this.buildUrl(codeType, code);
+      console.log(url);
+      if (!isWechat()) {
+        Indicator.close();
+        let shareObj = {
+          shareTitle: '政企合伙人',
+          shareDesc: this.title + '：' + this.inviteCode,
+          shareLink: url,
+          sharePic: ''
+        };
+        handleShare(this, shareObj);
+        return;
+      }
+      this.tipShow = true;
+    },
+    buildUrl: function(codeType, code, urlType) {
+      let url = `${window.location.origin + baseUrl}/partner/#/codeshare?ct=${codeType}&c=${code}`;
+      if (process.env.NODE_ENV === 'development') {
+        url = `${window.location.origin}/#/codeshare?ct=${codeType}&c=${code}`;
+      }
+      if (urlType === 'public') {
+        url = `${window.location.origin + baseUrl}/packageSalary/share?url=${encodeURIComponent(url)}`;
+      }
+      return url;
+    },
+    buildQRUrl: function(inviteCode) {
+      let url = `${window.location.origin + baseUrl}/register/wx/oAuth/userInfo?info=inviteCode=${inviteCode}`;
+      return url;
+    },
+    drawQrCode: function() {
+      let url = this.buildQRUrl(this.inviteCode);
+      let opts = {
+        errorCorrectionLevel: 'Q',
+        type: 'image/png',
+        width: 1000,
+        rendererOpts: {
+          quality: 0.3
+        },
+        margin: 0
+      };
+      this.consoleLogs += '<p>____________</p><p>开始生成二维码</p>';
+      QRCode.toCanvas(url, opts).then(qrCanvas => {
+        var width = 120;
+        var height = 120;
+        var x = width * 3.3;
+        var y = height * 3.3;
+        var lw = width * 0.28;
+        var lh = height * 0.28;
+
+        var qrLogo = new Image();
+        // qrLogo.setAttribute('crossOrigin', 'Anonymous'); // 图片跨域
+        qrLogo.src = 'static/img/cmcc_logo.png'; // 设置二维码LOGO图片
+        qrLogo.onerror = () => {
+          this.consoleLogs += '<p>Logo加载失败</p>';
+          Indicator.close();
+        };
+        this.consoleLogs += '<p>准备在二维码上画LOGO</p>';
+        qrLogo.onload = () => {
+          this.consoleLogs += '<p>开始在二维码上画LOGO</p>';
+          qrCanvas.getContext('2d').drawImage(qrLogo, x, y, lw * 6, lh * 6); // 在二维码上画LOGO
+          this.qrcodeSrc = qrCanvas.toDataURL('image/png');
+        };
+      });
+    },
+    closeTipLayer: function() {
+      this.tipShow = false;
+    },
+    fullScreen: function(clickedSrc) {
+      if (this.duringTime >= 600) {
+        return;
+      }
+      this.fullScreenSrc = clickedSrc;
+      this.isFullScreen = true;
+    },
+    closeFullScreen: function() {
+      if (this.duringTime >= 600) {
+        return;
+      }
+      this.isFullScreen = false;
+    },
+    touchStart: function(e) {
+      this.duringTime = 0;
+      this.startTime = new Date().getTime();
+    },
+    touchEnd: function(e) {
+      this.duringTime = new Date().getTime() - this.startTime;
     }
-  };
+  }
+};
 </script>
-<style>
+<style lang="less">
   .invite-code-share-container {
     background: #f0f0f0;
     padding: 20px 5%;

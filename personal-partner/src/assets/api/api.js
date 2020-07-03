@@ -42,7 +42,7 @@ export default {
         logout(vue);
         return;
       }
-      reqParams.sucCb && reqParams.sucCb({vue: vue, json: json, originParams: reqParams.originParams});
+      reqParams.sucCb && reqParams.sucCb({ vue: vue, json: json, originParams: reqParams.originParams });
       // loadingInstance.close();
     }).catch(ex => {
       // loadingInstance.close();
@@ -57,7 +57,7 @@ export default {
         }
       }
       console.log(ex.response);
-      reqParams.failCb && reqParams.failCb({vue: vue, ex: ex, originParams: reqParams.originParams});
+      reqParams.failCb && reqParams.failCb({ vue: vue, ex: ex, originParams: reqParams.originParams });
     });
   },
   post(vue, reqParams) {
@@ -98,7 +98,7 @@ export default {
         logout(vue);
         return;
       }
-      reqParams.sucCb && reqParams.sucCb({vue: vue, json: json, originParams: reqParams.originParams});
+      reqParams.sucCb && reqParams.sucCb({ vue: vue, json: json, originParams: reqParams.originParams });
       // loadingInstance.close();
     }).catch(ex => {
       // loadingInstance.close();
@@ -112,7 +112,7 @@ export default {
           vue.$message.error(res.statusText);
         }
       }
-      reqParams.failCb && reqParams.failCb({vue: vue, ex: ex, originParams: reqParams.originParams});
+      reqParams.failCb && reqParams.failCb({ vue: vue, ex: ex, originParams: reqParams.originParams });
     });
   },
   form(vue, reqParams) {
@@ -164,7 +164,7 @@ export default {
         logout(vue);
         return;
       }
-      reqParams.sucCb && reqParams.sucCb({vue: vue, json: json, originParams: reqParams.originParams});
+      reqParams.sucCb && reqParams.sucCb({ vue: vue, json: json, originParams: reqParams.originParams });
       // loadingInstance.close();
     }).catch(ex => {
       // loadingInstance.close();
@@ -178,7 +178,7 @@ export default {
           vue.$message.error(res.statusText);
         }
       }
-      reqParams.failCb && reqParams.failCb({vue: vue, ex: ex, originParams: reqParams.originParams});
+      reqParams.failCb && reqParams.failCb({ vue: vue, ex: ex, originParams: reqParams.originParams });
     });
   },
   jsonp(vue, reqParams) {
@@ -190,10 +190,10 @@ export default {
         logout(vue);
         return;
       }
-      reqParams.sucCb && reqParams.sucCb({vue: vue, json: json, originParams: reqParams.originParams});
+      reqParams.sucCb && reqParams.sucCb({ vue: vue, json: json, originParams: reqParams.originParams });
       // loadingInstance.close();
     }).catch(ex => {
-      reqParams.failCb && reqParams.failCb({vue: vue, ex: ex, originParams: reqParams.originParams});
+      reqParams.failCb && reqParams.failCb({ vue: vue, ex: ex, originParams: reqParams.originParams });
       // loadingInstance.close();
     });
   }

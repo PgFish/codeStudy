@@ -3,7 +3,7 @@
     <div class="rich-text" v-html="moneyStrategy"></div>
   </div>
 </template>
-<style>
+<style lang="less">
 .money-strategy {
   min-height: 100%;
   padding-bottom: 60px;

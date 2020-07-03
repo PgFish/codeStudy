@@ -192,12 +192,12 @@ export default {
               MessageBox.alert('未获取到推荐资费，请重试');
             }
           } else {
-            Toast({message: '配置异常，请联系管理员', position: 'bottom'});
+            Toast({ message: '配置异常，请联系管理员', position: 'bottom' });
           }
         },
         (vue, ex) => {
           Indicator.close();
-          Toast({message: '网络错误，请稍候再试', position: 'bottom'});
+          Toast({ message: '网络错误，请稍候再试', position: 'bottom' });
         }
       );
       sendGetRequest(this, reqParams);
@@ -207,11 +207,11 @@ export default {
         return;
       }
       if (this.isSmsSending) {
-        Toast({message: '请等待' + this.smsTip, position: 'bottom'});
+        Toast({ message: '请等待' + this.smsTip, position: 'bottom' });
         return;
       }
       if (!Constants.cmccMobileReg.test(this.phone)) {
-        Toast({message: '请输入正确的移动手机号', position: 'bottom'});
+        Toast({ message: '请输入正确的移动手机号', position: 'bottom' });
         return;
       }
       let params = {
@@ -237,7 +237,7 @@ export default {
         (vue, ex) => {
           console.log(ex);
           Indicator.close();
-          Toast({message: '服务器异常，请稍后再试', position: 'bottom'});
+          Toast({ message: '服务器异常，请稍后再试', position: 'bottom' });
         }
       );
       Indicator.open();
@@ -281,7 +281,7 @@ export default {
     // 校验号码是否可以办里
     checkPhone: function() {
       if (this.isSmsSending) {
-        Toast({message: '请等待' + this.smsTip, position: 'bottom'});
+        Toast({ message: '请等待' + this.smsTip, position: 'bottom' });
         return;
       }
       var data = this.getCheckPhoneParams();
@@ -320,7 +320,7 @@ export default {
         (vue, ex) => {
           console.log(ex);
           Indicator.close();
-          Toast({message: '服务器异常，号码校验失败', position: 'bottom'});
+          Toast({ message: '服务器异常，号码校验失败', position: 'bottom' });
         }
       );
       Indicator.open();
@@ -332,15 +332,15 @@ export default {
         return;
       }
       if (!Constants.cmccMobileReg.test(this.phone)) {
-        Toast({message: '请输入正确的四川移动手机号', position: 'bottom'});
+        Toast({ message: '请输入正确的四川移动手机号', position: 'bottom' });
         return;
       }
       if (!/\d{6}/.test(this.sms)) {
-        Toast({message: '请输入正确的6位数字验证码', position: 'bottom'});
+        Toast({ message: '请输入正确的6位数字验证码', position: 'bottom' });
         return;
       }
       if (!this.selectedFee.value) {
-        Toast({message: '资费错误，请联系管理员', position: 'bottom'});
+        Toast({ message: '资费错误，请联系管理员', position: 'bottom' });
         return;
       }
       if (!this.ifAgree) {
@@ -489,7 +489,7 @@ export default {
         (vue, ex) => {
           console.log(ex);
           Indicator.close();
-          Toast({message: '服务器异常，请稍后再试', position: 'bottom'});
+          Toast({ message: '服务器异常，请稍后再试', position: 'bottom' });
         }
       );
       Indicator.open();
@@ -498,7 +498,7 @@ export default {
   }
 };
 </script>
-<style>
+<style lang="less">
   button {
     cursor: pointer;
   }
